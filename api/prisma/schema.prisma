@@ -1,0 +1,99 @@
+// ===== GENERATOR & DATASOURCE =====
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== ENUMS =====
+
+enum user_role_enum {
+  user
+  admin
+  super_admin
+}
+
+enum user_provider_enum {
+  local
+  google
+}
+
+enum profile_language_enum {
+  ko
+  en
+}
+
+// ===== MODELS =====
+
+model User {
+  // Primary Key
+  id        String             @id @default(dbgenerated("public.uuid_generate_v4()")) @db.Uuid
+  
+  // User Information
+  email     String             @unique @db.VarChar
+  password  String?            @db.VarChar
+  firstName String             @db.VarChar
+  lastName  String             @db.VarChar
+  oauthId   String?            @db.VarChar
+  
+  // User Settings
+  role      user_role_enum     @default(user)
+  provider  user_provider_enum @default(local)
+  lastLogin DateTime?          @db.Timestamp(6)
+  
+  // Timestamps (Common fields)
+  createdAt DateTime           @default(now()) @db.Timestamp(6)
+  updatedAt DateTime           @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt DateTime?          @db.Timestamp(6)
+
+  // Relations
+  profileId String?            @unique @db.Uuid
+  profile   Profile?           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("user")
+}
+
+model Profile {
+  // Primary Key
+  id        String                 @id @default(dbgenerated("public.uuid_generate_v4()")) @db.Uuid
+  
+  // Profile Information
+  username  String                @db.VarChar
+  avatarUrl String                @db.VarChar
+  bio       String?
+  language  profile_language_enum?
+
+  // Timestamps (Common fields)
+  createdAt DateTime               @default(now()) @db.Timestamp(6)
+  updatedAt DateTime               @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt DateTime?              @db.Timestamp(6)
+
+  // Relations
+  user      User?
+
+  @@map("profile")
+}
+
+model PendingUser {
+  // Primary Key
+  id               Int      @id @default(autoincrement())
+  
+  // User Information
+  email            String   @unique @db.VarChar
+  password         String   @db.VarChar
+  firstName        String   @db.VarChar
+  lastName         String   @db.VarChar
+  
+  // Verification
+  verificationCode String   @db.VarChar
+  codeExpiresAt    DateTime @db.Timestamp(6)
+
+  // Timestamps
+  createdAt        DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("pending_user")
+}
