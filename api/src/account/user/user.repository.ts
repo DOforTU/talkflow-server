@@ -6,13 +6,10 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findWithProfileById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: {
         id,
-      },
-      include: {
-        profile: true,
       },
     });
   }
