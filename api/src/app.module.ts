@@ -1,11 +1,13 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
 import { LoggingMiddleware } from './common/middleware/logging.middleware';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { UserModule } from './account/user/user.module';
+import { AuthModule } from './account/auth/auth.module';
+import { ProfileModule } from './account/profile/profile.module';
 
 @Module({
   imports: [
@@ -14,7 +16,9 @@ import { UserModule } from './account/user/user.module';
       envFilePath: '.env',
     }),
     PrismaModule,
+    AuthModule,
     UserModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

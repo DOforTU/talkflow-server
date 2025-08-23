@@ -7,8 +7,8 @@ export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   // ===== READ =====
-  async getUserById(id: string): Promise<User> {
-    const user = await this.findUserById(id);
+  async getUserWithProfileById(id: string): Promise<User> {
+    const user = await this.findWithProfileById(id);
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -18,11 +18,8 @@ export class UserService {
   }
 
   // ===== Sub Functions =====
-  async findUserBySub(sub: string): Promise<User | null> {
-    return await this.userRepository.findUserBySub(sub);
-  }
 
-  async findUserById(id: string): Promise<User | null> {
-    return await this.userRepository.findUserById(id);
+  async findWithProfileById(id: string): Promise<User | null> {
+    return await this.userRepository.findWithProfileById(id);
   }
 }

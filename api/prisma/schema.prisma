@@ -31,49 +31,49 @@ enum profile_language_enum {
 
 model User {
   // Primary Key
-  id        String             @id @default(dbgenerated("public.uuid_generate_v4()")) @db.Uuid
+  id  String                    @id @default(dbgenerated("public.uuid_generate_v4()")) @db.Uuid
   
   // User Information
-  email     String             @unique @db.VarChar
-  password  String?            @db.VarChar
-  firstName String             @db.VarChar
-  lastName  String             @db.VarChar
-  oauthId   String?            @db.VarChar
+  email     String              @unique @db.VarChar
+  password  String?             @db.VarChar
+  firstName String              @db.VarChar
+  lastName  String              @db.VarChar
+  oauthId   String?             @db.VarChar
   
   // User Settings
-  role      user_role_enum     @default(user)
-  provider  user_provider_enum @default(local)
-  lastLogin DateTime?          @db.Timestamp(6)
+  role      user_role_enum      @default(user)
+  provider  user_provider_enum  @default(local)
+  lastLogin DateTime?           @db.Timestamp(6)
   
   // Timestamps (Common fields)
-  createdAt DateTime           @default(now()) @db.Timestamp(6)
-  updatedAt DateTime           @default(now()) @updatedAt @db.Timestamp(6)
-  deletedAt DateTime?          @db.Timestamp(6)
+  createdAt DateTime            @default(now()) @db.Timestamp(6)
+  updatedAt DateTime            @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt DateTime?           @db.Timestamp(6)
 
   // Relations
-  profileId String?            @unique @db.Uuid
-  profile   Profile?           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile   Profile?            
 
   @@map("user")
 }
 
 model Profile {
   // Primary Key
-  id        String                 @id @default(dbgenerated("public.uuid_generate_v4()")) @db.Uuid
+  id        String                  @id @default(dbgenerated("public.uuid_generate_v4()")) @db.Uuid
   
   // Profile Information
-  username  String                @db.VarChar
-  avatarUrl String                @db.VarChar
+  username  String                  @db.VarChar
+  avatarUrl String                  @db.VarChar
   bio       String?
   language  profile_language_enum?
 
   // Timestamps (Common fields)
-  createdAt DateTime               @default(now()) @db.Timestamp(6)
-  updatedAt DateTime               @default(now()) @updatedAt @db.Timestamp(6)
-  deletedAt DateTime?              @db.Timestamp(6)
+  createdAt DateTime                @default(now()) @db.Timestamp(6)
+  updatedAt DateTime                @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt DateTime?               @db.Timestamp(6)
 
   // Relations
-  user      User?
+  userId    String?                 @unique @db.Uuid
+  user      User?                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profile")
 }
