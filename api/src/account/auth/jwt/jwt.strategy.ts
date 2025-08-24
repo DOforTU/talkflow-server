@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { Strategy as JwtStrategy } from 'passport-jwt';
-import { UserService } from 'src/account/user/user.service';
+import { AuthService } from '../auth.service';
 
 // Function to extract JWT token from cookies
 const cookieExtractor = (req: Request): string | null => {
@@ -15,10 +15,10 @@ const cookieExtractor = (req: Request): string | null => {
 };
 
 @Injectable()
-export class JwtAuthStrategy extends PassportStrategy(JwtStrategy) {
+export class JwtAuthStrategy extends PassportStrategy(JwtStrategy, 'jwt') {
   constructor(
     private readonly configService: ConfigService,
-    private readonly userService: UserService,
+    private readonly authService: AuthService,
   ) {
     const secret = configService.get<string>('JWT_SECRET');
     if (!secret) {
@@ -35,16 +35,10 @@ export class JwtAuthStrategy extends PassportStrategy(JwtStrategy) {
   async validate(payload: {
     sub: string;
     email: string;
-    type: string;
     iat: number;
     exp: number;
   }) {
-    // Allow access tokens only
-    if (payload.type !== 'access') {
-      throw new UnauthorizedException('Invalid token type');
-    }
-
-    const user = await this.userService.findUserBySub(payload.sub);
+    const user = await this.authService.findUserBySub(payload.sub);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

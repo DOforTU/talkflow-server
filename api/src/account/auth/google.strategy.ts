@@ -17,9 +17,6 @@ interface GoogleProfile {
   photos: Array<{
     value: string;
   }>;
-  _json?: {
-    locale?: string;
-  };
 }
 
 @Injectable()
@@ -42,7 +39,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     try {
-      const { id, name, emails, photos, _json } = profile;
+      const { id, name, emails, photos } = profile;
 
       const googleUser = {
         id,
@@ -50,7 +47,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         firstName: name?.givenName || '',
         lastName: name?.familyName || '',
         picture: photos[0]?.value || '',
-        locale: _json?.locale,
       };
 
       const result = await this.authService.validateGoogleUser(googleUser);

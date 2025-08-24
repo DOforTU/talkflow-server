@@ -1,131 +1,52 @@
 import {
   Controller,
   Get,
-  Post,
   UseGuards,
   Req,
   Res,
+  UseFilters,
+  Post,
   Body,
   Request,
-  UseFilters,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
+import {
+  AuthenticatedRequest,
+  CompleteOnboardingDto,
+  RequestWithCookies,
+  UserWithProfile,
+} from './auth.dto';
 import { GoogleAuthExceptionFilter } from './filters/google-auth-exception.filter';
 import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
-import { CreateLocalUserDto, LocalLoginDto } from '../user/user.dto';
-import { User } from '../user/user.entity';
-import { AuthResult, CompleteOnboardingDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt';
+import { User } from '@prisma/client';
 
-/** Cookie type definition */
-interface AuthCookies {
-  accessToken?: string;
-  refreshToken?: string;
-}
-
-/** Request interface with cookies */
-interface RequestWithCookies extends Request {
-  cookies: AuthCookies;
-}
-
-/** Google OAuth authenticated request interface */
-interface AuthenticatedRequest extends Request {
-  user: AuthResult; // Receives AuthResult instead of GoogleUser
-}
-
-/**
- * Authentication Management Controller
- * - Handle Google OAuth login
- * - JWT token management
- * - Logout handling
- */
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // ===== Onboarding APIs =====
+  // ===== Get My Info =====
 
-  /** Complete user onboarding */
-  @Post('complete-onboarding')
+  @Get('me')
   @UseGuards(JwtAuthGuard)
-  async completeOnboarding(
-    @Body() onboardingDto: CompleteOnboardingDto,
-    @Request() req: { user: User },
-  ): Promise<{ success: boolean; message: string }> {
-    return await this.authService.completeOnboarding(
-      req.user.id,
-      onboardingDto,
-    );
+  async getMe(@Request() req: { user: User }): Promise<UserWithProfile> {
+    return await this.authService.getUserInfoById(req.user.id);
   }
 
-  // ===== User Management APIs =====
+  // ===== Google OAuth =====
 
-  @Post('send-email-code')
-  async sendEmailCode(@Body('email') email: string) {
-    await this.authService.sendEmailCode(email);
-    return { success: true, message: '인증코드가 전송되었습니다.' };
-  }
-
-  /** 이메일 인증코드 확인 */
-  @Post('check-code')
-  async checkCode(
-    @Body('email') email: string,
-    @Body('code') code: string,
-  ): Promise<{ email: string }> {
-    return await this.authService.verifyEmailCode(email, code);
-  }
-
-  /** Sign up with local account */
-  @Post('signup')
-  async signup(
-    @Body() signupDto: CreateLocalUserDto,
-  ): Promise<{ email: string; message: string }> {
-    const result = await this.authService.signup(signupDto);
-    return {
-      ...result,
-      message: 'Verification code sent to your email. Please check your inbox.',
-    };
-  }
-
-  /** Complete signup after email verification */
-  @Post('complete-signup')
-  async completeSignup(
-    @Body('email') email: string,
-    @Body('code') code: string,
-  ): Promise<{ email: string; message: string }> {
-    return await this.authService.completeSignup(email, code);
-  }
-
-  @Post('login')
-  @UseGuards(RateLimitGuard)
-  /** Local account login */
-  async login(
-    @Body() loginDto: LocalLoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<User> {
-    return await this.authService.login(loginDto, res);
-  }
-
-  // ===== Authentication APIs =====
-
-  /** Start Google OAuth login */
   @Get('google')
-  @UseGuards(
-    AuthGuard('google'), // call GoogleStrategy --> validate user by GOOGLE --> validateGoogleUser()
-    RateLimitGuard,
-  )
+  @UseGuards(AuthGuard('google'))
   async googleAuth() {
     // Route to start Google OAuth flow
   }
 
-  /** Handle Google OAuth callback */
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @UseFilters(GoogleAuthExceptionFilter)
-  googleAuthRedirect(@Req() req: AuthenticatedRequest, @Res() res: Response) {
-    // Use AuthResult already validated by Google Strategy
+  googleCallback(@Req() req: AuthenticatedRequest, @Res() res: Response) {
     const { user } = req.user;
 
     // Generate tokens and set cookies
@@ -138,7 +59,26 @@ export class AuthController {
     }
     const frontendUrl = process.env.FRONTEND_URL;
 
-    res.redirect(`${frontendUrl}/app/`);
+    res.redirect(`${frontendUrl}/`);
+  }
+
+  // ===== Common Login =====
+
+  /**
+   * Handle user onboarding: It's necessary to complete the user profile.
+   * @param req Authenticated request
+   * @param res Response object
+   */
+  @Post('onboarding')
+  @UseGuards(JwtAuthGuard)
+  async completeOnboarding(
+    @Body() onboardingDto: CompleteOnboardingDto,
+    @Request() req: { user: User },
+  ): Promise<boolean> {
+    return await this.authService.completeOnboarding(
+      req.user.id,
+      onboardingDto,
+    );
   }
 
   // ===== Token Management APIs =====
@@ -194,9 +134,3 @@ export class AuthController {
     });
   }
 }
-
-// TODO: Implement additional social login providers (Kakao, Naver, etc.)
-// TODO: Add 2FA (Two-Factor Authentication) feature
-// TODO: Session management and multi-device login control
-// TODO: Apply API Rate Limiting
-// TODO: Login attempt limiting and security enhancement

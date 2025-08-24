@@ -1,46 +1,77 @@
-import { User } from '../user/user.entity';
-import { IsString, IsEnum } from 'class-validator';
-import { SupportedLanguage } from '../profile/profile.dto';
+import { Profile, profile_language_enum, User } from '@prisma/client';
+import { IsString, IsNotEmpty, IsIn } from 'class-validator';
 
-/** Google OAuth user information interface */
+/** Cookie type definition */
+export interface AuthCookies {
+  accessToken?: string;
+  refreshToken?: string;
+}
+
+/** Request interface with cookies */
+export interface RequestWithCookies extends Request {
+  cookies: AuthCookies;
+}
+
+/** Google OAuth authenticated request interface */
+export interface AuthenticatedRequest extends Request {
+  user: AuthResult; // Receives AuthResult instead of GoogleUser
+}
+
 export interface GoogleUser {
   id: string; // Google OAuth ID
   email: string;
   firstName: string;
   lastName: string;
   picture: string;
-  locale?: string; // Google에서 제공하는 언어 정보 (예: 'ko', 'en', 'ja')
 }
 
+/** JWT payload type definition */
+export interface JwtPayload {
+  sub: string; // UUID string
+  email?: string;
+  type: 'access' | 'refresh';
+  iat?: number;
+  exp?: number;
+}
 /** Authentication result interface */
 export interface AuthResult {
   accessToken: string;
   user: User;
 }
 
-/** JWT payload type definition */
-export interface JwtPayload {
-  sub: number;
-  email?: string;
-  type: 'access' | 'refresh';
-  iat?: number;
-  exp?: number;
-}
-
-/** Token generation result interface */
 export interface TokenPair {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 }
 
-/** Complete onboarding DTO */
+// Google Strategy에서 내부적으로 생성 (HTTP 요청 아님)
+export interface CreateGoogleUserDto {
+  oauthId: string; // Google OAuth ID
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface CreateProfileDto {
+  username: string;
+  avatarUrl: string;
+}
+
+export interface UserWithProfile extends User {
+  profile: Profile | null;
+}
+
+// ===== HTTP 요청에서 사용되는 DTO: 데코레이터 필수 =====
+
 export class CompleteOnboardingDto {
   @IsString()
+  @IsNotEmpty()
   firstName: string;
 
   @IsString()
+  @IsNotEmpty()
   lastName: string;
 
-  @IsEnum(SupportedLanguage)
-  language: SupportedLanguage;
+  @IsIn(['ko', 'en'])
+  language: profile_language_enum;
 }
