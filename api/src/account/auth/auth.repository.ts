@@ -12,7 +12,7 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findUserInfoById(userId: string): Promise<UserWithProfile | null> {
+  async findUserInfoById(userId: number): Promise<UserWithProfile | null> {
     return await this.prisma.user.findUnique({
       where: { id: userId },
       include: { profile: true },
@@ -39,7 +39,7 @@ export class AuthRepository {
     });
   }
 
-  async findUserBySub(sub: string): Promise<User | null> {
+  async findUserBySub(sub: number): Promise<User | null> {
     return await this.prisma.user.findUnique({
       where: {
         id: sub,
@@ -76,7 +76,7 @@ export class AuthRepository {
   }
 
   async completeOnboarding(
-    userId: string,
+    userId: number,
     dto: CompleteOnboardingDto,
   ): Promise<boolean> {
     try {

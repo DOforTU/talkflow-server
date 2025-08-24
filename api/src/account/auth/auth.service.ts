@@ -23,7 +23,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async getUserInfoById(userId: string): Promise<UserWithProfile> {
+  async getUserInfoById(userId: number): Promise<UserWithProfile> {
     const user = await this.authRepository.findUserInfoById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -87,7 +87,7 @@ export class AuthService {
   }
 
   async completeOnboarding(
-    userId: string,
+    userId: number,
     dto: CompleteOnboardingDto,
   ): Promise<boolean> {
     await this.userService.getUserById(userId);
@@ -247,7 +247,7 @@ export class AuthService {
   }
 
   // ===== Sub Funcions ====
-  async findUserBySub(sub: string): Promise<User | null> {
+  async findUserBySub(sub: number): Promise<User | null> {
     return this.authRepository.findUserBySub(sub);
   }
 }

@@ -27,7 +27,7 @@ export interface GoogleUser {
 
 /** JWT payload type definition */
 export interface JwtPayload {
-  sub: string; // UUID string
+  sub: number; // User ID
   email?: string;
   type: 'access' | 'refresh';
   iat?: number;

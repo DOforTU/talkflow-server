@@ -7,7 +7,7 @@ export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   // ===== READ =====
-  async getUserById(id: string): Promise<User> {
+  async getUserById(id: number): Promise<User> {
     const user = await this.findUserById(id);
 
     if (!user) {
@@ -19,7 +19,7 @@ export class UserService {
 
   // ===== Sub Functions =====
 
-  async findUserById(id: string): Promise<User | null> {
+  async findUserById(id: number): Promise<User | null> {
     return await this.userRepository.findById(id);
   }
 }
