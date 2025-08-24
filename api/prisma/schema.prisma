@@ -31,8 +31,8 @@ enum profile_language_enum {
 
 model User {
   // Primary Key
-  id  String                    @id @default(dbgenerated("public.uuid_generate_v4()")) @db.Uuid
-  
+  id  Int                       @id @default(autoincrement()) @db.Integer
+
   // User Information
   email     String              @unique @db.VarChar
   password  String?             @db.VarChar
@@ -58,8 +58,8 @@ model User {
 
 model Profile {
   // Primary Key
-  id        String                  @id @default(dbgenerated("public.uuid_generate_v4()")) @db.Uuid
-  
+  id        Int                     @id @default(autoincrement()) @db.Integer
+
   // Profile Information
   username  String                  @db.VarChar
   avatarUrl String                  @db.VarChar
@@ -72,7 +72,7 @@ model Profile {
   deletedAt DateTime?               @db.Timestamp(6)
 
   // Relations
-  userId    String?                 @unique @db.Uuid
+  userId    Int?                    @unique @db.Integer
   user      User?                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profile")
@@ -80,7 +80,7 @@ model Profile {
 
 model PendingUser {
   // Primary Key
-  id               Int      @id @default(autoincrement())
+  id               Int      @id @default(autoincrement()) @db.Integer
   
   // User Information
   email            String   @unique @db.VarChar
