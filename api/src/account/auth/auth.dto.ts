@@ -53,7 +53,7 @@ export interface CreateGoogleUserDto {
 }
 
 export interface CreateProfileDto {
-  username: string;
+  nickname: string;
   avatarUrl: string;
 }
 
@@ -71,6 +71,10 @@ export class CompleteOnboardingDto {
   @IsString()
   @IsNotEmpty()
   lastName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  nickname: string;
 
   @IsIn(['ko', 'en'])
   language: profile_language_enum;

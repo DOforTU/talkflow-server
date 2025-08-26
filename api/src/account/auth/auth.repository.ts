@@ -63,7 +63,7 @@ export class AuthRepository {
         provider: user_provider_enum.google,
         profile: {
           create: {
-            username: profileDto.username,
+            nickname: profileDto.nickname,
             avatarUrl: profileDto.avatarUrl,
           },
         },
@@ -87,7 +87,7 @@ export class AuthRepository {
           lastName: dto.lastName,
           profile: {
             update: {
-              username: `${dto.firstName} ${dto.lastName}`.toLowerCase(),
+              nickname: dto.nickname,
               language: dto.language,
             },
           },

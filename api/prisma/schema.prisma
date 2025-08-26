@@ -61,7 +61,7 @@ model Profile {
   id        Int                     @id @default(autoincrement()) @db.Integer
 
   // Profile Information
-  username  String                  @db.VarChar
+  nickname  String                  @unique @db.VarChar
   avatarUrl String                  @db.VarChar
   bio       String?
   language  profile_language_enum?
