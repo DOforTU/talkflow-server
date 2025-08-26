@@ -7,8 +7,6 @@ import { LoggingMiddleware } from './common/middleware/logging.middleware';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { UserModule } from './account/user/user.module';
 import { AuthModule } from './account/auth/auth.module';
-import { ProfileModule } from './account/profile/profile.module';
-import { FollowModule } from './account/follow/follow.module';
 
 @Module({
   imports: [
@@ -19,8 +17,6 @@ import { FollowModule } from './account/follow/follow.module';
     PrismaModule,
     AuthModule,
     UserModule,
-    ProfileModule,
-    FollowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
