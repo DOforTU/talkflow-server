@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
 import {
@@ -110,6 +114,14 @@ export class AuthService {
     dto: CompleteOnboardingDto,
   ): Promise<boolean> {
     await this.userService.getUserById(userId);
+
+    const isExisting = await this.profileService.isExistingNickname(
+      dto.nickname,
+    );
+    if (isExisting) {
+      throw new ConflictException('Nickname already exists');
+    }
+
     return await this.authRepository.completeOnboarding(userId, dto);
   }
 
