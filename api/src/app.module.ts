@@ -10,6 +10,7 @@ import { AuthModule } from './account/auth/auth.module';
 import { ProfileModule } from './account/profile/profile.module';
 import { SilhouetteModule } from './silhouette/silhouette/silhouette.module';
 import { SilhouetteLikeModule } from './silhouette/silhouette-like/silhouette-like.module';
+import { SilhouetteController } from './silhouette/silhouette/silhouette.controller';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { SilhouetteLikeModule } from './silhouette/silhouette-like/silhouette-li
     SilhouetteModule,
     SilhouetteLikeModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, SilhouetteController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {

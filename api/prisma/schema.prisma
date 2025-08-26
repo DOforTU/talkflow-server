@@ -27,6 +27,11 @@ enum profile_language_enum {
   en
 }
 
+enum content_enum {
+  image
+  video
+}
+
 // ===== MODELS =====
 
 model User {
@@ -44,6 +49,7 @@ model User {
   role      user_role_enum      @default(user)
   provider  user_provider_enum  @default(local)
   lastLogin DateTime?           @db.Timestamp(6)
+  silhouettes  Silhouette[]
   
   // Timestamps (Common fields)
   createdAt DateTime            @default(now()) @db.Timestamp(6)
@@ -96,4 +102,24 @@ model PendingUser {
   createdAt        DateTime @default(now()) @db.Timestamp(6)
 
   @@map("pending_user")
+}
+
+model Silhouette {
+  // Primary Key
+  id          Int       @id @default(autoincrement()) @db.Integer
+
+  // Silhouette Information
+  contentUrl       String    @db.VarChar
+  type    content_enum?
+  runningTime Float  @db.DoublePrecision() @default(15.0)
+
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Timestamps (Common fields)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt   DateTime? @db.Timestamp(6)
+
+  @@map("silhouette")
 }
