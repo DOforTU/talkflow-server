@@ -54,7 +54,7 @@ model User {
   profile   Profile?            
 
   @@unique([email, deletedAt])
-  @@unique([oauthId, deletedAt])
+  @@unique([oauthId, provider, deletedAt])
   @@map("user")
 }
 
