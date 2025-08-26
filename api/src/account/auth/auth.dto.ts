@@ -1,5 +1,12 @@
 import { Profile, profile_language_enum, User } from '@prisma/client';
-import { IsString, IsNotEmpty, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsIn,
+  MaxLength,
+  MinLength,
+  Matches,
+} from 'class-validator';
 
 /** Cookie type definition */
 export interface AuthCookies {
@@ -74,6 +81,12 @@ export class CompleteOnboardingDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(30)
+  @MinLength(4)
+  // 닉네임은 띄어쓰기 안되고, 영문 및 숫자 '_'만 사용할 수 있음.
+  @Matches(/^[a-zA-Z0-9_]+$/, {
+    message: '닉네임은 영문, 숫자, 밑줄(_)만 사용할 수 있습니다.',
+  })
   nickname: string;
 
   @IsIn(['ko', 'en'])
