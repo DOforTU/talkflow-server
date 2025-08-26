@@ -73,11 +73,10 @@ export class AuthService {
           avatarUrl: googleUser.picture,
         };
 
-        // TODO: nickname 중복 충돌이 일어날 경우 랜덤 숫자를 한 번 더 부여
         // 최대 5번 반복, 만약 그래도 중복이면, 다시 로그인을 시도해주세요 라는 문구를 남김
-
+        let isExisting: boolean = false;
         for (let i = 0; i < 5; i++) {
-          const isExisting = await this.profileService.isExistingNickname(
+          isExisting = await this.profileService.isExistingNickname(
             createProfileDto.nickname,
           );
           if (!isExisting) {
@@ -86,6 +85,9 @@ export class AuthService {
           createProfileDto.nickname = `${createProfileDto.nickname}${Math.floor(
             10000 + Math.random() * 90000,
           )}`;
+        }
+        if (isExisting) {
+          throw new Error('Nickname already exists. Please try again.');
         }
 
         user = await this.authRepository.createUserWithProfile(
