@@ -245,7 +245,7 @@ export class AuthService {
     return (
       'sub' in obj &&
       'type' in obj &&
-      typeof obj.sub === 'string' &&
+      typeof obj.sub === 'number' &&
       (obj.type === 'access' || obj.type === 'refresh')
     );
   }

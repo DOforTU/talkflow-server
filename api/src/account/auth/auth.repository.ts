@@ -41,13 +41,10 @@ export class AuthRepository {
   }
 
   async findUserBySub(sub: number): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    return await this.prisma.user.findFirst({
       where: {
         id: sub,
         deletedAt: null,
-      },
-      include: {
-        profile: true,
       },
     });
   }
