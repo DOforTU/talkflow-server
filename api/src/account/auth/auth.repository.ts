@@ -13,15 +13,15 @@ export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findUserInfoById(userId: number): Promise<UserWithProfile | null> {
-    return await this.prisma.user.findUnique({
-      where: { id: userId },
+    return await this.prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
       include: { profile: true },
     });
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return await this.prisma.user.findUnique({
-      where: { email },
+    return await this.prisma.user.findFirst({
+      where: { email, deletedAt: null },
       include: { profile: true },
     });
   }
@@ -34,6 +34,7 @@ export class AuthRepository {
       where: {
         oauthId,
         provider,
+        deletedAt: null,
       },
       include: { profile: true },
     });
@@ -43,6 +44,7 @@ export class AuthRepository {
     return await this.prisma.user.findUnique({
       where: {
         id: sub,
+        deletedAt: null,
       },
       include: {
         profile: true,
@@ -81,7 +83,7 @@ export class AuthRepository {
   ): Promise<boolean> {
     try {
       const updatedUser = await this.prisma.user.update({
-        where: { id: userId },
+        where: { id: userId, deletedAt: null },
         data: {
           firstName: dto.firstName,
           lastName: dto.lastName,

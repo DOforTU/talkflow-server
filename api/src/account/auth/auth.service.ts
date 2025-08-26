@@ -117,6 +117,7 @@ export class AuthService {
 
     const isExisting = await this.profileService.isExistingNickname(
       dto.nickname,
+      userId,
     );
     if (isExisting) {
       throw new ConflictException('Nickname already exists');
