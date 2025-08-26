@@ -7,6 +7,7 @@ import { LoggingMiddleware } from './common/middleware/logging.middleware';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { UserModule } from './account/user/user.module';
 import { AuthModule } from './account/auth/auth.module';
+import { ProfileModule } from './account/profile/profile.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from './account/auth/auth.module';
     PrismaModule,
     AuthModule,
     UserModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
