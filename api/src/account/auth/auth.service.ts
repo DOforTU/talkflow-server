@@ -112,17 +112,27 @@ export class AuthService {
   async completeOnboarding(
     userId: number,
     dto: CompleteOnboardingDto,
-  ): Promise<boolean> {
+  ): Promise<User> {
     await this.userService.getUserById(userId);
 
     const isExisting = await this.profileService.isExistingNickname(
       dto.nickname,
+      userId,
     );
     if (isExisting) {
       throw new ConflictException('Nickname already exists');
     }
 
-    return await this.authRepository.completeOnboarding(userId, dto);
+    const updatedUser = await this.authRepository.completeOnboarding(
+      userId,
+      dto,
+    );
+
+    if (!updatedUser) {
+      throw new Error('Failed to complete onboarding');
+    }
+
+    return updatedUser;
   }
 
   // ===== Token Management Methods =====
@@ -244,7 +254,7 @@ export class AuthService {
     return (
       'sub' in obj &&
       'type' in obj &&
-      typeof obj.sub === 'string' &&
+      typeof obj.sub === 'number' &&
       (obj.type === 'access' || obj.type === 'refresh')
     );
   }

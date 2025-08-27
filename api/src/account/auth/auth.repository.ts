@@ -13,15 +13,15 @@ export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findUserInfoById(userId: number): Promise<UserWithProfile | null> {
-    return await this.prisma.user.findUnique({
-      where: { id: userId },
+    return await this.prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
       include: { profile: true },
     });
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return await this.prisma.user.findUnique({
-      where: { email },
+    return await this.prisma.user.findFirst({
+      where: { email, deletedAt: null },
       include: { profile: true },
     });
   }
@@ -34,18 +34,17 @@ export class AuthRepository {
       where: {
         oauthId,
         provider,
+        deletedAt: null,
       },
       include: { profile: true },
     });
   }
 
   async findUserBySub(sub: number): Promise<User | null> {
-    return await this.prisma.user.findUnique({
+    return await this.prisma.user.findFirst({
       where: {
         id: sub,
-      },
-      include: {
-        profile: true,
+        deletedAt: null,
       },
     });
   }
@@ -54,7 +53,7 @@ export class AuthRepository {
     userDto: CreateGoogleUserDto,
     profileDto: CreateProfileDto,
   ): Promise<User | null> {
-    const user = await this.prisma.user.create({
+    return await this.prisma.user.create({
       data: {
         email: userDto.email,
         firstName: userDto.firstName,
@@ -69,36 +68,24 @@ export class AuthRepository {
         },
       },
     });
-
-    return await this.prisma.user.findUnique({
-      where: { id: user.id },
-    });
   }
 
   async completeOnboarding(
     userId: number,
     dto: CompleteOnboardingDto,
-  ): Promise<boolean> {
-    try {
-      const updatedUser = await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          profile: {
-            update: {
-              nickname: dto.nickname,
-              language: dto.language,
-            },
+  ): Promise<User | null> {
+    return await this.prisma.user.update({
+      where: { id: userId, deletedAt: null },
+      data: {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        profile: {
+          update: {
+            nickname: dto.nickname,
+            language: dto.language,
           },
         },
-      });
-      // 성공 시 true 반환
-      return !!updatedUser;
-    } catch (error) {
-      // 업데이트 실패 시 예외 처리 (예: 해당 user가 없을 경우)
-      console.error('Failed to complete onboarding:', error);
-      return false;
-    }
+      },
+    });
   }
 }

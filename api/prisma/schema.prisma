@@ -34,7 +34,7 @@ model User {
   id  Int                       @id @default(autoincrement()) @db.Integer
 
   // User Information
-  email     String              @unique @db.VarChar
+  email     String              @db.VarChar
   password  String?             @db.VarChar
   firstName String              @db.VarChar
   lastName  String              @db.VarChar
@@ -53,6 +53,8 @@ model User {
   // Relations
   profile   Profile?            
 
+  @@unique([email, deletedAt])
+  @@unique([oauthId, provider, deletedAt])
   @@map("user")
 }
 
@@ -61,7 +63,7 @@ model Profile {
   id        Int                     @id @default(autoincrement()) @db.Integer
 
   // Profile Information
-  nickname  String                  @unique @db.VarChar
+  nickname  String                  @db.VarChar
   avatarUrl String                  @db.VarChar
   bio       String?
   language  profile_language_enum?
@@ -72,9 +74,10 @@ model Profile {
   deletedAt DateTime?               @db.Timestamp(6)
 
   // Relations
-  userId    Int?                    @unique @db.Integer
-  user      User?                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int                    @unique @db.Integer
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([nickname, deletedAt])
   @@map("profile")
 }
 

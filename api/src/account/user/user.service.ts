@@ -21,7 +21,11 @@ export class UserService {
   // ===== UPDATE =====
   async updateMe(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     await this.getUserById(id);
-    return this.userRepository.updateMe(id, updateUserDto);
+    const updatedUser = await this.userRepository.updateMe(id, updateUserDto);
+    if (!updatedUser) {
+      throw new Error('Failed to update user');
+    }
+    return updatedUser;
   }
 
   // ===== Sub Functions =====

@@ -83,9 +83,10 @@ export class CompleteOnboardingDto {
   @IsNotEmpty()
   @MaxLength(30)
   @MinLength(4)
-  // 닉네임은 띄어쓰기 안되고, 영문 및 숫자 '_'만 사용할 수 있음.
-  @Matches(/^[a-zA-Z0-9_]+$/, {
-    message: '닉네임은 영문, 숫자, 밑줄(_)만 사용할 수 있습니다.',
+  // 닉네임은 띄어쓰기 없이 영문, 숫자, 한글 및 밑줄('_')만 사용할 수 있음.
+  @Matches(/^[a-zA-Z0-9_가-힣]+$/u, {
+    message:
+      'You can only use English, numbers, Korean, and underscores(_) without spaces.',
   })
   nickname: string;
 

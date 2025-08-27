@@ -74,7 +74,7 @@ export class AuthController {
   async completeOnboarding(
     @Body() onboardingDto: CompleteOnboardingDto,
     @Request() req: { user: User },
-  ): Promise<boolean> {
+  ): Promise<User> {
     return await this.authService.completeOnboarding(
       req.user.id,
       onboardingDto,
