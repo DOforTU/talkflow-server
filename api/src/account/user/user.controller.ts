@@ -10,10 +10,10 @@ export class UserController {
 
   @Patch('me')
   @UseGuards(JwtAuthGuard)
-  async updateMe(
+  async updateUser(
     @Request() req: { user: User },
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    return this.userService.updateMe(req.user.id, updateUserDto);
+    return this.userService.updateUser(req.user.id, updateUserDto);
   }
 }
