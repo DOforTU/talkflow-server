@@ -72,6 +72,7 @@ model Profile {
   createdAt DateTime                @default(now()) @db.Timestamp(6)
   updatedAt DateTime                @default(now()) @updatedAt @db.Timestamp(6)
   deletedAt DateTime?               @db.Timestamp(6)
+  version   Int                     @default(1) @db.Integer
 
   // Relations
   userId    Int                    @unique @db.Integer

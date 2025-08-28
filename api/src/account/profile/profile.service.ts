@@ -59,15 +59,17 @@ export class ProfileService {
     userId: number,
     profileId: number,
     dto: UpdateProfileDto,
-  ) {
-    const profile = await this.getProfileById(profileId);
+  ): Promise<Profile> {
+    const profile = await this.profileRepository.findById(profileId);
 
-    if (profile.userId !== userId) {
+    // 1. 프로필 존재 여부 및 소유자 권한 확인
+    if (!profile || profile.userId !== userId) {
       throw new ForbiddenException(
         'You are not allowed to update this profile',
       );
     }
 
+    // 2. 낙관적 잠금 로직 실행
     return await this.profileRepository.update(profileId, dto);
   }
 
