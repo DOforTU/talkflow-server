@@ -45,8 +45,8 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('SayPlan API')
-    .setDescription('SayPlan 프로젝트 API 문서')
+    .setTitle('Silhouette API')
+    .setDescription('Silhouette 프로젝트 API 문서')
     .setVersion('1.0')
     .addBearerAuth(
       {

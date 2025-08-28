@@ -1,6 +1,8 @@
 import { profile_language_enum } from '@prisma/client';
 import {
   IsIn,
+  IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Matches,
@@ -39,4 +41,8 @@ export class UpdateProfileDto {
   @IsString()
   @IsOptional()
   bio?: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  version: number;
 }

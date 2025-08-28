@@ -10,7 +10,7 @@ import {
 import { ProfileService } from './profile.service';
 import { JwtAuthGuard } from '../auth/jwt';
 import { UpdateProfileDto } from './profile.dto';
-import { User } from '@prisma/client';
+import { Profile, User } from '@prisma/client';
 
 @Controller('profiles')
 export class ProfileController {
@@ -27,7 +27,7 @@ export class ProfileController {
     @Request() req: { user: User },
     @Param('id') id: number,
     @Body() updateProfileDto: UpdateProfileDto,
-  ) {
+  ): Promise<Profile> {
     return await this.profileService.updateProfile(
       req.user.id,
       id,
