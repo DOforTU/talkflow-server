@@ -10,16 +10,16 @@ export class SilhouetteRepository {
   async createSilhouette(
     userId: number,
     createSilhouettesDto: CreateSilhouettesDto,
+    type: 'image' | 'video' | null,
   ): Promise<Silhouette> {
     return this.prisma.silhouette.create({
-      data: { ...createSilhouettesDto, userId },
+      data: { ...createSilhouettesDto, userId, type },
     });
   }
 
-  //  async updateMe(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-  //    return this.prisma.user.update({
-  //      where: { id },
-  //      data: { ...updateUserDto },
-  //    });
-  //  }
+  async getSilhouetteById(silhouetteId: number): Promise<Silhouette | null> {
+    return this.prisma.silhouette.findUnique({
+      where: { id: silhouetteId, deletedAt: null },
+    });
+  }
 }

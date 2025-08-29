@@ -57,7 +57,9 @@ model User {
   deletedAt DateTime?           @db.Timestamp(6)
 
   // Relations
-  profile   Profile?            
+  profile   Profile?     
+
+  likes     SilhouetteLike[]       
 
   @@map("user")
 }
@@ -121,5 +123,26 @@ model Silhouette {
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
   deletedAt   DateTime? @db.Timestamp(6)
 
+  likes       SilhouetteLike[]
+
   @@map("silhouette")
+}
+
+model SilhouetteLike {
+  // Primary Key
+  id           Int       @id @default(autoincrement()) @db.Integer
+
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  silhouetteId Int
+  silhouette   Silhouette @relation(fields: [silhouetteId], references: [id], onDelete: Cascade)
+
+  // Timestamps (Common fields)
+  createdAt    DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt    DateTime? @db.Timestamp(6)
+
+  @@unique([userId, silhouetteId])
+  @@map("silhouette_like")
 }

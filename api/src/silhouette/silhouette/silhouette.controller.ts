@@ -14,6 +14,7 @@ export class SilhouetteController {
     @Request() req: { user: User },
     @Body() createSilhouettes: CreateSilhouettesDto,
   ): Promise<Silhouette> {
+    console.log('Received contentUrl:', createSilhouettes.contentUrl);
     return await this.silhouetteService.createSilhouettes(
       req.user.id,
       createSilhouettes,
