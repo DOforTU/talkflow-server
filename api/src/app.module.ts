@@ -8,9 +8,9 @@ import { PrismaModule } from './common/prisma/prisma.module';
 import { UserModule } from './account/user/user.module';
 import { AuthModule } from './account/auth/auth.module';
 import { ProfileModule } from './account/profile/profile.module';
-import { SilhouetteModule } from './service/silhouette/silhouette.module';
-import { SilhouetteLikeModule } from './service/silhouette-like/silhouette-like.module';
 import { FileModule } from './common/module/file/file.module';
+import { EventModule } from './schedule/event/event.module';
+import { RecurringEventModule } from './schedule/recurring-event/recurring-event.module';
 
 @Module({
   imports: [
@@ -22,9 +22,9 @@ import { FileModule } from './common/module/file/file.module';
     AuthModule,
     UserModule,
     ProfileModule,
-    SilhouetteModule,
-    SilhouetteLikeModule,
     FileModule,
+    EventModule,
+    RecurringEventModule,
   ],
   controllers: [AppController],
   providers: [AppService],
