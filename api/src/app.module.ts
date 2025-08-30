@@ -10,6 +10,7 @@ import { AuthModule } from './account/auth/auth.module';
 import { ProfileModule } from './account/profile/profile.module';
 import { SilhouetteModule } from './silhouette/silhouette/silhouette.module';
 import { SilhouetteLikeModule } from './silhouette/silhouette-like/silhouette-like.module';
+import { FileModule } from './common/module/file/file.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SilhouetteLikeModule } from './silhouette/silhouette-like/silhouette-li
     ProfileModule,
     SilhouetteModule,
     SilhouetteLikeModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
