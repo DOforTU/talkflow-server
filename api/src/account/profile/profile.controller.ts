@@ -6,6 +6,7 @@ import {
   Patch,
   Request,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { JwtAuthGuard } from '../auth/jwt';
@@ -33,5 +34,14 @@ export class ProfileController {
       id,
       updateProfileDto,
     );
+  }
+
+  @Post(':id/reset-avatar')
+  @UseGuards(JwtAuthGuard)
+  async resetToDefaultAvatar(
+    @Request() req: { user: User },
+    @Param('id') id: number,
+  ): Promise<Profile> {
+    return await this.profileService.resetToDefaultAvatar(req.user.id, id);
   }
 }
