@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { SilhouetteLikeRepository } from './silhouette-like.repository';
 import { SilhouetteLike } from '@prisma/client';
 import { SilhouetteService } from '../silhouette/silhouette.service';
+import { ProfileService } from 'src/account/profile/profile.service';
 
 @Injectable()
 export class SilhouetteLikeService {
   constructor(
     private readonly silhouetteLikeRepository: SilhouetteLikeRepository,
     private readonly silhouetteService: SilhouetteService,
+    private readonly profileService: ProfileService,
   ) {}
 
   // ----- SUB FUNCTION -----
@@ -22,8 +24,9 @@ export class SilhouetteLikeService {
   ): Promise<SilhouetteLike> {
     await this.silhouetteService.getSilhouetteById(silhouetteId);
 
+    const profile = await this.profileService.getProfileByUserId(userId);
     const existingLike = await this.silhouetteLikeRepository.isExistingLike(
-      userId,
+      profile.id,
       silhouetteId,
     );
 
@@ -31,20 +34,20 @@ export class SilhouetteLikeService {
       if (existingLike.deletedAt === null) {
         // 이미 좋아요 상태 -> 취소(soft delete)
         return await this.silhouetteLikeRepository.removeLike(
-          userId,
+          profile.id,
           silhouetteId,
         );
       } else {
         // soft delete 상태면 복구
         return await this.silhouetteLikeRepository.restoreLike(
-          userId,
+          profile.id,
           silhouetteId,
         );
       }
     } else {
       // 기존 좋아요 없으면 새로 생성
       return await this.silhouetteLikeRepository.createLike(
-        userId,
+        profile.id,
         silhouetteId,
       );
     }

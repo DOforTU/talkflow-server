@@ -8,12 +8,13 @@ export class SilhouetteRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async createSilhouette(
-    userId: number,
+    profileId: number,
     createSilhouettesDto: CreateSilhouettesDto,
+    contentUrl: string,
     type: content_enum,
   ): Promise<Silhouette> {
     return await this.prisma.silhouette.create({
-      data: { ...createSilhouettesDto, userId, type },
+      data: { ...createSilhouettesDto, profileId, contentUrl, type },
     });
   }
 

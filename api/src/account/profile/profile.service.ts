@@ -59,6 +59,15 @@ export class ProfileService {
     return profile;
   }
 
+  async getProfileByUserId(userId: number): Promise<Profile> {
+    const profile = await this.profileRepository.findByUserId(userId);
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    return profile;
+  }
   // ===== UPDATE =====
 
   async updateProfile(
