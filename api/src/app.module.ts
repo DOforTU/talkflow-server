@@ -11,6 +11,8 @@ import { ProfileModule } from './account/profile/profile.module';
 import { FileModule } from './common/module/file/file.module';
 import { EventModule } from './schedule/event/event.module';
 import { RecurringEventModule } from './schedule/recurring-event/recurring-event.module';
+import { SilhouetteLikeModule } from './social/silhouette-like/silhouette-like.module';
+import { SilhouetteModule } from './social/silhouette/silhouette.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { RecurringEventModule } from './schedule/recurring-event/recurring-event
     FileModule,
     EventModule,
     RecurringEventModule,
+    SilhouetteModule,
+    SilhouetteLikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
