@@ -14,7 +14,6 @@ export class SilhouetteService {
   constructor(
     private readonly silhouetteRepository: SilhouetteRepository,
     private readonly profileService: ProfileService,
-    private readonly storageService: StorageService,
   ) {}
 
   // ----- CREATE -----
@@ -22,20 +21,13 @@ export class SilhouetteService {
   async createSilhouettes(
     userId: number,
     createSilhouettesDto: CreateSilhouettesDto,
-    file: Express.Multer.File,
   ): Promise<Silhouette> {
     // Silhouette 생성 로직 구현
-    const folder = 'silhouette';
-    // 파일 업로드는 StorageService에서 처리
-    // const contentUrl = await this.storageService.uploadFile(file, folder);
-    // createSilhouettesDto.contentUrl = contentUrl;
-    const contentUrl = await this.storageService.uploadFile(file, folder);
     const type = this.getTypeByUrl(createSilhouettesDto.contentUrl);
     const profile = await this.profileService.getProfileByUserId(userId);
     return await this.silhouetteRepository.createSilhouette(
       profile.id,
       createSilhouettesDto,
-      contentUrl,
       type,
     );
   }

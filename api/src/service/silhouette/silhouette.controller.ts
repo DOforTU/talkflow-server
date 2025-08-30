@@ -23,14 +23,11 @@ export class SilhouetteController {
   @UseInterceptors(FileInterceptor('file'))
   async createSilhouettes(
     @Request() req: { user: User },
-    @Body() createSilhouettes: CreateSilhouettesDto,
-    @UploadedFile() file: Express.Multer.File,
+    @Body() createSilhouetteDto: CreateSilhouettesDto,
   ): Promise<Silhouette> {
-    console.log('Received contentUrl:', createSilhouettes.contentUrl);
     return await this.silhouetteService.createSilhouettes(
       req.user.id,
-      createSilhouettes,
-      file,
+      createSilhouetteDto,
     );
   }
 }

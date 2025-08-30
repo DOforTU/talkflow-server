@@ -10,11 +10,10 @@ export class SilhouetteRepository {
   async createSilhouette(
     profileId: number,
     createSilhouettesDto: CreateSilhouettesDto,
-    contentUrl: string,
     type: content_enum,
   ): Promise<Silhouette> {
     return await this.prisma.silhouette.create({
-      data: { ...createSilhouettesDto, profileId, contentUrl, type },
+      data: { ...createSilhouettesDto, profileId, type },
     });
   }
 
