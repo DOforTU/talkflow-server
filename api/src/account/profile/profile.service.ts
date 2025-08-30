@@ -6,10 +6,16 @@ import {
 import { ProfileRepository } from './profile.repository';
 import { Profile } from '@prisma/client';
 import { ResponseProfileDto, UpdateProfileDto } from './profile.dto';
+import { ConfigService } from '@nestjs/config';
+import { StorageService } from '../../common/module/storage/storage.service';
 
 @Injectable()
 export class ProfileService {
-  constructor(private readonly profileRepository: ProfileRepository) {}
+  constructor(
+    private readonly profileRepository: ProfileRepository,
+    private readonly storageService: StorageService,
+    private readonly configService: ConfigService,
+  ) {}
 
   // ===== READ =====
 
@@ -69,7 +75,12 @@ export class ProfileService {
       );
     }
 
-    // 2. 낙관적 잠금 로직 실행
+    // 2. 아바타 URL이 변경되는 경우 기존 이미지 삭제
+    if (dto.avatarUrl && profile.avatarUrl !== dto.avatarUrl) {
+      await this.deleteOldAvatar(profile.avatarUrl);
+    }
+
+    // 3. 낙관적 잠금 로직 실행
     return await this.profileRepository.update(profileId, dto);
   }
 
@@ -99,5 +110,51 @@ export class ProfileService {
 
   async findProfileById(id: number): Promise<Profile | null> {
     return await this.profileRepository.findById(id);
+  }
+
+  // ===== Private Helper Methods =====
+
+  /**
+   * 기존 아바타 이미지를 Google Storage에서 삭제
+   * @param avatarUrl 삭제할 아바타 URL
+   */
+  private async deleteOldAvatar(avatarUrl: string): Promise<void> {
+    try {
+      // 기본 아바타나 외부 URL은 삭제하지 않음
+      if (!avatarUrl || avatarUrl.includes('default-avatar')) {
+        return;
+      }
+
+      // Google Storage의 파일인 경우에만 삭제
+      const filePath = this.storageService.extractFilePathFromUrl(avatarUrl);
+      if (filePath) {
+        await this.storageService.deleteFile(filePath);
+      }
+    } catch (error) {
+      // 이미지 삭제 실패는 로그만 남기고 계속 진행
+      console.error('Failed to delete old avatar:', error);
+    }
+  }
+
+  /**
+   * 기본 아바타 URL을 반환
+   * @returns 기본 아바타 URL
+   */
+  getDefaultAvatarUrl(): string {
+    return this.configService.get<string>(
+      'USER_DEFAULT_AVATAR_URL',
+      'https://via.placeholder.com/128/cccccc/ffffff?text=Avatar',
+    );
+  }
+
+  /**
+   * 사용자 아바타 저장소 URL을 반환
+   * @returns 사용자 아바타 저장소 URL
+   */
+  getUserAvatarStorageUrl(): string {
+    return this.configService.get<string>(
+      'USER_AVATAR_URLS',
+      'https://example.com/user-avatar/',
+    );
   }
 }
