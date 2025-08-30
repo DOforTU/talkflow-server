@@ -5,11 +5,16 @@ import {
 } from '@nestjs/common';
 import { CreateSilhouettesDto } from './silhoutette.dto';
 import { SilhouetteRepository } from './silhouette.repository';
-import { content_enum, Silhouette } from '@prisma/client';
+import { content_enum, Profile, Silhouette } from '@prisma/client';
+import { ProfileService } from 'src/account/profile/profile.service';
+import { StorageService } from 'src/common/module/storage/storage.service';
 
 @Injectable()
 export class SilhouetteService {
-  constructor(private readonly silhouetteRepository: SilhouetteRepository) {}
+  constructor(
+    private readonly silhouetteRepository: SilhouetteRepository,
+    private readonly profileService: ProfileService,
+  ) {}
 
   // ----- CREATE -----
 
@@ -19,9 +24,9 @@ export class SilhouetteService {
   ): Promise<Silhouette> {
     // Silhouette 생성 로직 구현
     const type = this.getTypeByUrl(createSilhouettesDto.contentUrl);
-    console.log('determined type:', type);
+    const profile = await this.profileService.getProfileByUserId(userId);
     return await this.silhouetteRepository.createSilhouette(
-      userId,
+      profile.id,
       createSilhouettesDto,
       type,
     );
