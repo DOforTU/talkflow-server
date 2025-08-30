@@ -5,9 +5,8 @@ import {
 } from '@nestjs/common';
 import { CreateSilhouettesDto } from './silhoutette.dto';
 import { SilhouetteRepository } from './silhouette.repository';
-import { content_enum, Profile, Silhouette } from '@prisma/client';
+import { content_enum, Silhouette } from '@prisma/client';
 import { ProfileService } from 'src/account/profile/profile.service';
-import { StorageService } from 'src/common/module/storage/storage.service';
 
 @Injectable()
 export class SilhouetteService {
@@ -26,7 +25,7 @@ export class SilhouetteService {
     const type = this.getTypeByUrl(createSilhouettesDto.contentUrl);
     const profile = await this.profileService.getProfileByUserId(userId);
     return await this.silhouetteRepository.createSilhouette(
-      profile.id,
+      profile.id as number,
       createSilhouettesDto,
       type,
     );

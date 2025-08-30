@@ -54,10 +54,13 @@ model User {
   createdAt DateTime            @default(now()) @db.Timestamp(6)
   updatedAt DateTime            @default(now()) @updatedAt @db.Timestamp(6)
   deletedAt DateTime?           @db.Timestamp(6)
-  version   Int                     @default(1) @db.Integer
+  version   Int                 @default(1) @db.Integer
 
   // Relations
-  profile   Profile?          
+  profile     Profile?
+  event           Event[]
+  recurringEvent  RecurringEvent[]
+          
 
   @@unique([email, deletedAt])
   @@unique([oauthId, provider, deletedAt])
@@ -73,7 +76,6 @@ model Profile {
   avatarUrl String                  @db.VarChar
   bio       String?
   language  profile_language_enum?
-  silhouettes  Silhouette[]
 
   // Timestamps (Common fields)
   createdAt DateTime                @default(now()) @db.Timestamp(6)
@@ -84,6 +86,7 @@ model Profile {
   // Relations
   userId    Int                    @unique @db.Integer
   user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  silhouettes  Silhouette[]
   likes     SilhouetteLike[]  
 
   @@unique([nickname, deletedAt])
@@ -149,4 +152,84 @@ model SilhouetteLike {
 
   @@unique([profileId, silhouetteId])
   @@map("silhouette_like")
+}
+
+model Event{
+  // Primary Key
+  id          Int       @id @default(autoincrement()) @db.Integer
+
+  // Event Information
+  title       String    @db.VarChar
+  description String?   @db.VarChar
+  startTime   DateTime  @db.Timestamp(6) 
+  endTime     DateTime  @db.Timestamp(6)
+  isAllDay    Boolean   @default(false)
+  colorCode   String    @db.VarChar(7)
+
+  // Relations 
+  userId            Int
+  user              User   @relation(fields: [userId], references: [id])
+  recurringEventId  Int?
+  recurringEvent    RecurringEvent? @relation(fields: [recurringEventId], references: [id])
+  locationId        Int?
+  location          Location? @relation(fields: [locationId], references: [id])
+
+  // Timestamps (Common fields)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt   DateTime? @db.Timestamp(6)
+
+
+
+  @@map("event")
+}
+
+model RecurringEvent{
+  // Primary Key
+  id          Int       @id @default(autoincrement()) @db.Integer
+
+  // Recurring Event Information
+  rule        String    @db.VarChar(255)
+  startDate   DateTime  @db.Timestamp(6) 
+  endDate     DateTime? @db.Timestamp(6) 
+  title       String    @db.VarChar
+  description String?   @db.VarChar
+  colorCode   String    @db.VarChar(7)
+
+  // Relation
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  locationId  Int?
+  location    Location? @relation(fields: [locationId], references: [id])
+  events      Event[]
+
+  // Timestamps (Common fields)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt   DateTime? @db.Timestamp(6)
+
+  @@map("recurring_event")
+}
+
+model Location {
+  // Primary Key
+  id              Int       @id @default(autoincrement()) @db.Integer
+
+  // Location Information
+  nameEn          String?    @db.VarChar
+  nameKo          String?    @db.VarChar
+  address         String    @db.VarChar
+  latitude        Float     @db.DoublePrecision()
+  longitude       Float     @db.DoublePrecision()
+
+  // Relations
+  events          Event[]
+  recurringEvents RecurringEvent[]
+
+  // Timestamps (Common fields)
+  createdAt       DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt       DateTime? @db.Timestamp(6)
+
+  @@map("location")
 }

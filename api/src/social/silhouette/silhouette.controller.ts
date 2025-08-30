@@ -1,10 +1,8 @@
 import {
   Body,
   Controller,
-  Param,
   Post,
   Request,
-  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
