@@ -42,7 +42,7 @@ export class StorageService {
   /**
    * 파일을 Google Cloud Storage에 업로드
    * @param file 업로드할 파일
-   * @param folder 저장할 폴더 (user-profile, team-image 등)
+   * @param folder 저장할 폴더 (user-profile, silhouette 등)
    * @returns 업로드된 파일의 공개 URL
    */
   async uploadFile(file: Express.Multer.File, folder: string): Promise<string> {

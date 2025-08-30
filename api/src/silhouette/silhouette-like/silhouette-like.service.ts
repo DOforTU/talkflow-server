@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { SilhouetteRepository } from '../silhouette/silhouette.repository';
 import { SilhouetteLikeRepository } from './silhouette-like.repository';
 import { SilhouetteLike } from '@prisma/client';
+import { SilhouetteService } from '../silhouette/silhouette.service';
 
 @Injectable()
 export class SilhouetteLikeService {
   constructor(
     private readonly silhouetteLikeRepository: SilhouetteLikeRepository,
-    private readonly silhouetteService: SilhouetteRepository,
+    private readonly silhouetteService: SilhouetteService,
   ) {}
 
   // ----- SUB FUNCTION -----

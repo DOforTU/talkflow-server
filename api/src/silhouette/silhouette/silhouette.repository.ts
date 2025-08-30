@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Silhouette, User } from '@prisma/client';
+import { content_enum, Silhouette } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateSilhouettesDto } from './silhoutette.dto';
 
@@ -10,16 +10,16 @@ export class SilhouetteRepository {
   async createSilhouette(
     userId: number,
     createSilhouettesDto: CreateSilhouettesDto,
-    type: 'image' | 'video' | null,
+    type: content_enum,
   ): Promise<Silhouette> {
-    return this.prisma.silhouette.create({
+    return await this.prisma.silhouette.create({
       data: { ...createSilhouettesDto, userId, type },
     });
   }
 
-  async getSilhouetteById(silhouetteId: number): Promise<Silhouette | null> {
-    return this.prisma.silhouette.findUnique({
-      where: { id: silhouetteId, deletedAt: null },
+  async findById(id: number): Promise<Silhouette | null> {
+    return await this.prisma.silhouette.findFirst({
+      where: { id, deletedAt: null },
     });
   }
 }
