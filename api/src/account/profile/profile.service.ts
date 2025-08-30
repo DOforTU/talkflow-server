@@ -84,6 +84,32 @@ export class ProfileService {
     return await this.profileRepository.update(profileId, dto);
   }
 
+  async resetToDefaultAvatar(
+    userId: number,
+    profileId: number,
+  ): Promise<Profile> {
+    const profile = await this.profileRepository.findById(profileId);
+
+    // 1. 프로필 존재 여부 및 소유자 권한 확인
+    if (!profile || profile.userId !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to update this profile',
+      );
+    }
+
+    // 2. 기존 아바타 이미지 삭제
+    await this.deleteOldAvatar(profile.avatarUrl);
+
+    // 3. 기본 아바타로 변경
+    const defaultAvatarUrl = this.getDefaultAvatarUrl();
+    const updateDto = {
+      avatarUrl: defaultAvatarUrl,
+      version: profile.version,
+    };
+
+    return await this.profileRepository.update(profileId, updateDto);
+  }
+
   // ===== Sub Functions =====
 
   /**
