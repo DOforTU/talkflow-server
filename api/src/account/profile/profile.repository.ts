@@ -21,6 +21,12 @@ export class ProfileRepository {
     });
   }
 
+  async findByUserId(userId: number): Promise<Profile | null> {
+    return await this.prisma.profile.findFirst({
+      where: { userId, deletedAt: null },
+    });
+  }
+
   // ==== UPDATE ====
 
   async update(id: number, dto: UpdateProfileDto): Promise<Profile> {

@@ -9,25 +9,25 @@ export class SilhouetteLikeRepository {
   // ----- CREATE -----
 
   async createLike(
-    userId: number,
+    profileId: number,
     silhouetteId: number,
   ): Promise<SilhouetteLike> {
     return await this.prisma.silhouetteLike.create({
-      data: { userId, silhouetteId },
+      data: { profileId, silhouetteId },
     });
   }
 
   // ----- UPDATE -----
 
   async restoreLike(
-    userId: number,
+    profileId: number,
     silhouetteId: number,
   ): Promise<SilhouetteLike> {
     return await this.prisma.silhouetteLike.update({
       where: {
-        userId_silhouetteId: {
+        profileId_silhouetteId: {
           // 복합키 이름 (스키마에서 @@unique로 지정한 이름) 프리즈마 문법같음
-          userId,
+          profileId,
           silhouetteId,
         },
       },
@@ -38,14 +38,14 @@ export class SilhouetteLikeRepository {
   // ----- DELETE -----
 
   async removeLike(
-    userId: number,
+    profileId: number,
     silhouetteId: number,
   ): Promise<SilhouetteLike> {
     return await this.prisma.silhouetteLike.update({
       where: {
-        userId_silhouetteId: {
+        profileId_silhouetteId: {
           // 복합키 이름 (스키마에서 @@unique로 지정한 이름)
-          userId,
+          profileId,
           silhouetteId,
         },
       },
@@ -56,11 +56,11 @@ export class SilhouetteLikeRepository {
   // ----- SUB FUNCTION -----
 
   async isExistingLike(
-    userId: number,
+    profileId: number,
     silhouetteId: number,
   ): Promise<SilhouetteLike | null> {
     return await this.prisma.silhouetteLike.findFirst({
-      where: { userId, silhouetteId },
+      where: { profileId, silhouetteId },
     });
   }
 }
