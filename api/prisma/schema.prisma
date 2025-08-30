@@ -49,7 +49,6 @@ model User {
   role      user_role_enum      @default(user)
   provider  user_provider_enum  @default(local)
   lastLogin DateTime?           @db.Timestamp(6)
-  silhouettes  Silhouette[]
   
   // Timestamps (Common fields)
   createdAt DateTime            @default(now()) @db.Timestamp(6)
@@ -58,9 +57,7 @@ model User {
   version   Int                     @default(1) @db.Integer
 
   // Relations
-  profile   Profile?     
-
-  likes     SilhouetteLike[]       
+  profile   Profile?          
 
   @@unique([email, deletedAt])
   @@unique([oauthId, provider, deletedAt])
@@ -76,6 +73,7 @@ model Profile {
   avatarUrl String                  @db.VarChar
   bio       String?
   language  profile_language_enum?
+  silhouettes  Silhouette[]
 
   // Timestamps (Common fields)
   createdAt DateTime                @default(now()) @db.Timestamp(6)
@@ -86,6 +84,7 @@ model Profile {
   // Relations
   userId    Int                    @unique @db.Integer
   user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes     SilhouetteLike[]  
 
   @@unique([nickname, deletedAt])
   @@map("profile")
@@ -120,8 +119,8 @@ model Silhouette {
   type    content_enum?
   runningTime Float  @db.DoublePrecision() @default(15.0)
 
-  userId Int
-  user   User   @relation(fields: [userId], references: [id])
+  profileId Int
+  profile   Profile   @relation(fields: [profileId], references: [id])
 
   // Timestamps (Common fields)
   createdAt   DateTime  @default(now()) @db.Timestamp(6)
@@ -137,8 +136,8 @@ model SilhouetteLike {
   // Primary Key
   id           Int       @id @default(autoincrement()) @db.Integer
 
-  userId       Int
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profileId       Int
+  profile         Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   silhouetteId Int
   silhouette   Silhouette @relation(fields: [silhouetteId], references: [id], onDelete: Cascade)
@@ -148,6 +147,6 @@ model SilhouetteLike {
   updatedAt    DateTime  @default(now()) @updatedAt @db.Timestamp(6)
   deletedAt    DateTime? @db.Timestamp(6)
 
-  @@unique([userId, silhouetteId])
+  @@unique([profileId, silhouetteId])
   @@map("silhouette_like")
 }
