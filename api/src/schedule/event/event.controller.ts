@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { User, Event } from '@prisma/client';
 import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
 import { EventService } from './event.service';

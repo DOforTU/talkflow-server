@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { EventRepository } from './event.repository';
 import { Injectable } from '@nestjs/common';
 import { CreateEventDto } from './event.dto';
@@ -53,7 +52,7 @@ export class EventService {
         tx,
         userId,
         eventData,
-        recurring!, // non-null assertion
+        recurring as RecurringData,
         locationId,
       );
     });
@@ -165,7 +164,7 @@ export class EventService {
         recurringDate,
       );
 
-      const event = await tx.event.create({
+      const event: Event = await tx.event.create({
         data: {
           ...eventData,
           startTime: newStart,
