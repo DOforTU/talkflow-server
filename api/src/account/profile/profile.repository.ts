@@ -1,26 +1,33 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Profile } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { UpdateUserDto } from './user.dto';
+import { UpdateProfileDto } from './profile.dto';
 
 @Injectable()
-export class UserRepository {
+export class ProfileRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findById(id: number): Promise<User | null> {
-    return this.prisma.user.findFirst({
-      where: {
-        id,
-        deletedAt: null,
-      },
+  // ===== READ =====
+
+  async findById(id: number): Promise<Profile | null> {
+    return await this.prisma.profile.findFirst({
+      where: { id, deletedAt: null },
     });
   }
 
-  async updateUser(id: number, dto: UpdateUserDto): Promise<User | null> {
+  async findByNickname(nickname: string): Promise<Profile | null> {
+    return await this.prisma.profile.findFirst({
+      where: { nickname, deletedAt: null },
+    });
+  }
+
+  // ==== UPDATE ====
+
+  async update(id: number, dto: UpdateProfileDto): Promise<Profile> {
     try {
       // 1. Prisma의 update 메서드를 사용하여 조건부 업데이트
       // where 절에 id와 함께 버전 번호를 포함시켜 충돌 방지
-      return await this.prisma.user.update({
+      return await this.prisma.profile.update({
         where: {
           id: id,
           deletedAt: null,
@@ -35,7 +42,9 @@ export class UserRepository {
     } catch (e) {
       // 3. Prisma의 P2025 에러(레코드 없음)를 낙관적 잠금 충돌로 간주
       if (e.code === 'P2025') {
-        throw new ConflictException('User has been updated by another user.');
+        throw new ConflictException(
+          'Profile has been updated by another user.',
+        );
       }
       throw e;
     }

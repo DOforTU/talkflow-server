@@ -7,6 +7,10 @@ import { LoggingMiddleware } from './common/middleware/logging.middleware';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { UserModule } from './account/user/user.module';
 import { AuthModule } from './account/auth/auth.module';
+import { ProfileModule } from './account/profile/profile.module';
+import { SilhouetteModule } from './silhouette/silhouette/silhouette.module';
+import { SilhouetteLikeModule } from './silhouette/silhouette-like/silhouette-like.module';
+import { FileModule } from './common/module/file/file.module';
 
 @Module({
   imports: [
@@ -17,6 +21,10 @@ import { AuthModule } from './account/auth/auth.module';
     PrismaModule,
     AuthModule,
     UserModule,
+    ProfileModule,
+    SilhouetteModule,
+    SilhouetteLikeModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

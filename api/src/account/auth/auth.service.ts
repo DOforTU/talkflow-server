@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
 import {
@@ -14,12 +18,14 @@ import {
 import { User } from '@prisma/client';
 import { Response } from 'express';
 import { UserService } from '../user/user.service';
+import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly userService: UserService,
+    private readonly profileService: ProfileService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -71,8 +77,22 @@ export class AuthService {
           avatarUrl: googleUser.picture,
         };
 
-        // TODO: nickname 중복 충돌이 일어날 경우 랜덤 숫자를 한 번 더 부여
         // 최대 5번 반복, 만약 그래도 중복이면, 다시 로그인을 시도해주세요 라는 문구를 남김
+        let isExisting: boolean = false;
+        for (let i = 0; i < 5; i++) {
+          isExisting = await this.profileService.isExistingNickname(
+            createProfileDto.nickname,
+          );
+          if (!isExisting) {
+            break;
+          }
+          createProfileDto.nickname = `${createProfileDto.nickname}${Math.floor(
+            10000 + Math.random() * 90000,
+          )}`;
+        }
+        if (isExisting) {
+          throw new Error('Nickname already exists. Please try again.');
+        }
 
         user = await this.authRepository.createUserWithProfile(
           createUserDto,
@@ -92,9 +112,27 @@ export class AuthService {
   async completeOnboarding(
     userId: number,
     dto: CompleteOnboardingDto,
-  ): Promise<boolean> {
+  ): Promise<User> {
     await this.userService.getUserById(userId);
-    return await this.authRepository.completeOnboarding(userId, dto);
+
+    const isExisting = await this.profileService.isExistingNickname(
+      dto.nickname,
+      userId,
+    );
+    if (isExisting) {
+      throw new ConflictException('Nickname already exists');
+    }
+
+    const updatedUser = await this.authRepository.completeOnboarding(
+      userId,
+      dto,
+    );
+
+    if (!updatedUser) {
+      throw new Error('Failed to complete onboarding');
+    }
+
+    return updatedUser;
   }
 
   // ===== Token Management Methods =====
@@ -216,7 +254,7 @@ export class AuthService {
     return (
       'sub' in obj &&
       'type' in obj &&
-      typeof obj.sub === 'string' &&
+      typeof obj.sub === 'number' &&
       (obj.type === 'access' || obj.type === 'refresh')
     );
   }

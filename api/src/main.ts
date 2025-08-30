@@ -5,7 +5,6 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import * as cookieParser from 'cookie-parser';
-import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
@@ -32,11 +31,6 @@ async function bootstrap() {
     }),
   );
 
-  // uploads static files configuration
-  app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
-    prefix: '/uploads',
-  });
-
   // Global filter configuration (error handling)
   app.useGlobalFilters(new AllExceptionsFilter());
 
@@ -45,8 +39,8 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('SayPlan API')
-    .setDescription('SayPlan 프로젝트 API 문서')
+    .setTitle('Silhouette API')
+    .setDescription('Silhouette 프로젝트 API 문서')
     .setVersion('1.0')
     .addBearerAuth(
       {
