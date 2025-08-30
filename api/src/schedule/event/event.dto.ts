@@ -7,17 +7,18 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateLocationDto } from '../../location/dto/create-location.dto';
+import { CreateLocationDto } from '../location/location.dto';
 
 export class CreateRecurringRuleDto {
   @IsString()
-  rule: string; // RULE format
+  rule: string; // RRULE format
 
   @IsDateString()
   startDate: string;
 
+  @IsOptional()
   @IsDateString()
-  endDate: string;
+  endDate?: string;
 }
 
 export class CreateEventDto {
@@ -44,10 +45,10 @@ export class CreateEventDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => CreateLocationDto)
-  location?: CreateLocationDto;
+  location?: CreateLocationDto | null;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => CreateRecurringRuleDto)
-  recurring?: CreateRecurringRuleDto;
+  recurring?: CreateRecurringRuleDto | null;
 }

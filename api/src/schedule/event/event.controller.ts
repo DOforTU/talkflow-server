@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+import { User, Event } from '@prisma/client';
 import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
 import { EventService } from './event.service';
-import { CreateEventDto } from './dto/create-event.dto';
+import { CreateEventDto } from './event.dto';
 import { JwtAuthGuard } from 'src/account/auth/jwt';
 
 @Controller('events')
@@ -10,10 +12,15 @@ export class EventController {
 
   @Post()
   async createEvent(
-    @Request() req: any,
+    @Request() req: { user: User },
     @Body() createEventDto: CreateEventDto,
-  ) {
-    const userId = req.user.id;
-    return this.eventService.createEvent(userId, createEventDto);
+  ): Promise<Event | Event[]> {
+    if (createEventDto.recurring) {
+      return await this.eventService.createEvents(req.user.id, createEventDto);
+    }
+    return await this.eventService.createSingleEvent(
+      req.user.id,
+      createEventDto,
+    );
   }
 }

@@ -1,11 +1,13 @@
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateLocationDto {
   @IsString()
-  nameEn: string;
+  @IsOptional()
+  nameEn?: string | null;
 
   @IsString()
-  nameKo: string;
+  @IsOptional()
+  nameKo?: string | null;
 
   @IsString()
   address: string;

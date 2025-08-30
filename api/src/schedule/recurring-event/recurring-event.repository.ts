@@ -5,7 +5,7 @@ import { RecurringEvent } from '@prisma/client';
 interface CreateRecurringEventData {
   rule: string;
   startDate: Date;
-  endDate: Date;
+  endDate?: Date;
   title: string;
   description?: string;
   colorCode: string;

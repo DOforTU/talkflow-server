@@ -166,12 +166,13 @@ model Event{
   isAllDay    Boolean   @default(false)
   colorCode   String    @db.VarChar(7)
 
-  userId Int
-  user   User   @relation(fields: [userId], references: [id])
-  recurringEventId Int?
-  recurringEvent   RecurringEvent? @relation(fields: [recurringEventId], references: [id])
-  locationId Int?
-  location   Location? @relation(fields: [locationId], references: [id])
+  // Relations 
+  userId            Int
+  user              User   @relation(fields: [userId], references: [id])
+  recurringEventId  Int?
+  recurringEvent    RecurringEvent? @relation(fields: [recurringEventId], references: [id])
+  locationId        Int?
+  location          Location? @relation(fields: [locationId], references: [id])
 
   // Timestamps (Common fields)
   createdAt   DateTime  @default(now()) @db.Timestamp(6)
@@ -188,16 +189,16 @@ model RecurringEvent{
   id          Int       @id @default(autoincrement()) @db.Integer
 
   // Recurring Event Information
-  rule        String   @db.VarChar(255)
+  rule        String    @db.VarChar(255)
   startDate   DateTime  @db.Timestamp(6) 
-  endDate     DateTime  @db.Timestamp(6) 
+  endDate     DateTime? @db.Timestamp(6) 
   title       String    @db.VarChar
-  description String?    @db.VarChar
+  description String?   @db.VarChar
   colorCode   String    @db.VarChar(7)
 
   // Relation
   userId      Int
-  user        User   @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
   locationId  Int?
   location    Location? @relation(fields: [locationId], references: [id])
   events      Event[]
@@ -215,8 +216,8 @@ model Location {
   id              Int       @id @default(autoincrement()) @db.Integer
 
   // Location Information
-  nameEn          String    @db.VarChar
-  nameKo          String    @db.VarChar
+  nameEn          String?    @db.VarChar
+  nameKo          String?    @db.VarChar
   address         String    @db.VarChar
   latitude        Float     @db.DoublePrecision()
   longitude       Float     @db.DoublePrecision()
