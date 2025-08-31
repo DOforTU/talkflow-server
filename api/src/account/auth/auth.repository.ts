@@ -12,7 +12,9 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findUserInfoById(userId: number): Promise<UserWithProfile | null> {
+  async findUserWithProfileById(
+    userId: number,
+  ): Promise<UserWithProfile | null> {
     return await this.prisma.user.findFirst({
       where: { id: userId, deletedAt: null },
       include: { profile: true },

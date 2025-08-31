@@ -32,7 +32,7 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getMe(@Request() req: { user: User }): Promise<UserWithProfile> {
-    return await this.authService.getUserInfoById(req.user.id);
+    return await this.authService.getUserWithProfileById(req.user.id);
   }
 
   // ===== Google OAuth =====
