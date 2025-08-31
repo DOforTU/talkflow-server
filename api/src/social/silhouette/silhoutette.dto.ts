@@ -1,9 +1,19 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import e from 'express';
 
 export class CreateSilhouettesDto {
   @IsString()
   contentUrl: string;
 
   @IsOptional()
-  runningTime?: number;
+  @IsBoolean()
+  isPublic?: boolean;
+
+  //@IsOptional()
+  //runningTime?: number;
 }
+
+//export class UpdateSilhouettesDto {
+//  @IsString()
+//  contentUrl: string;
+//}
