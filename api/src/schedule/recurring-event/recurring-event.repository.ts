@@ -1,17 +1,7 @@
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { RecurringEvent } from '@prisma/client';
-
-interface CreateRecurringEventData {
-  rule: string;
-  startDate: Date;
-  endDate?: Date;
-  title: string;
-  description?: string;
-  colorCode: string;
-  userId: number;
-  locationId?: number;
-}
+import { CreateRecurringEventData } from './recurring-event.dto';
 
 @Injectable()
 export class RecurringEventRepository {

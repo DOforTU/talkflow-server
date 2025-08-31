@@ -47,6 +47,7 @@ export interface ResponseProfileDto {
   id: number;
   nickname: string;
   avatarUrl: string;
-  language: string | null;
+  language: profile_language_enum | null;
   bio: string | null;
+  version: number;
 }
