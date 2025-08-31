@@ -1,28 +1,13 @@
 import { EventRepository } from './event.repository';
 import { Injectable } from '@nestjs/common';
-import { CreateEventDto } from './event.dto';
+import { CreateEventDto, EventData, ResponseEventDto } from './event.dto';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LocationService } from '../location/location.service';
 import { RecurringEventService } from '../recurring-event/recurring-event.service';
 import { RRule } from 'rrule';
-import { Event } from '@prisma/client';
-
-// 이벤트 데이터 타입 정의
-interface EventData {
-  title: string;
-  description?: string;
-  startTime: string;
-  endTime: string;
-  isAllDay?: boolean;
-  colorCode: string;
-}
-
-// 반복 규칙 타입 정의
-export interface RecurringData {
-  rule: string;
-  startDate: string;
-  endDate?: string | null;
-}
+import { Event, Location, Prisma } from '@prisma/client';
+import { RecurringData } from '../recurring-event/recurring-event.dto';
+import { ResponseLocationDto } from '../location/location.dto';
 
 @Injectable()
 export class EventService {
@@ -34,75 +19,85 @@ export class EventService {
   ) {}
 
   // ===== CREATE =====
+
+  /**
+   * 1. dto에 위치 정보가 있다면 location 탐색 후 locationId를 반환받음
+   * 2. 반복 일정 생성(controller에서 recurring은 이미 존재하는 것을 보장)
+   * 2-1. recurringEvent 인스턴스 생성
+   * 2-2. recurringEvent의 start~end에 따라 여러 event를 생성
+   * @param userId
+   * @param createEventDto
+   * @returns
+   */
   async createEvents(
     userId: number,
     createEventDto: CreateEventDto,
   ): Promise<Event[]> {
+    const { recurring, location, ...eventData } = createEventDto;
+    // 위치 생성(location이 undefined라면 반환값도 undefined)
+    const locationId =
+      await this.locationService.createLocationIfNeeded(location);
+
     return await this.prismaService.$transaction(async (tx) => {
-      const { recurring, location, ...eventData } = createEventDto;
-
-      // 위치 생성
-      const locationId = await this.locationService.createLocationIfNeeded(
-        tx,
-        location,
-      );
-
-      // 반복 일정 생성 (controller에서 recurring은 이미 존재하는 것을 보장)
+      // 반복 일정 생성
       return this.createRecurringEvent(
         tx,
         userId,
         eventData,
-        recurring as RecurringData,
+        recurring!, // controller에서 recurring은 이미 존재하는 것을 보장
         locationId,
       );
     });
   }
 
+  /**
+   * 단일 이벤트 생성
+   * 1. dto에 위치 정보가 있다면 location 탐색 후 locationId를 반환받음
+   * 2. 이벤트 생성
+   * @param userId
+   * @param createEventDto
+   * @returns
+   */
   async createSingleEvent(
     userId: number,
     createEventDto: CreateEventDto,
   ): Promise<Event> {
-    return await this.prismaService.$transaction(async (tx) => {
-      const { location, ...eventData } = createEventDto;
+    const { location, ...eventData } = createEventDto;
 
-      // 위치 생성
-      const locationId = await this.locationService.createLocationIfNeeded(
-        tx,
-        location,
-      );
+    // 위치 생성(location이 undefined라면 반환값도 undefined)
+    const locationId =
+      await this.locationService.createLocationIfNeeded(location);
 
-      return this.createEvent(tx, userId, eventData, locationId);
-    });
+    return this.eventRepository.createSingleEvent(
+      userId,
+      eventData,
+      locationId,
+    );
+  }
+
+  // ===== READ =====
+  async getMyEvents(userId: number): Promise<ResponseEventDto[]> {
+    return await this.eventRepository.findEventsByUserId(userId);
   }
 
   // ===== Sub Functions =====
 
   /**
-   * 일반 이벤트 생성
-   */
-  private async createEvent(
-    tx: any,
-    userId: number,
-    eventData: EventData,
-    locationId?: number | null,
-  ): Promise<Event> {
-    return (await tx.event.create({
-      data: {
-        ...eventData,
-        startTime: new Date(eventData.startTime),
-        endTime: new Date(eventData.endTime),
-        isAllDay: eventData.isAllDay || false,
-        userId,
-        locationId,
-      },
-    })) as Event;
-  }
-
-  /**
-   * 반복 이벤트 생성
+   * 반복 일정과 이벤트 생성
+   * 1. recurringEvent 생성
+   * 2. recurringEvent의 시간에 맞게 여러 개의 이벤트 생성
+   * @param tx
+   * @param userId
+   * @param eventData
+   * @param recurring
+   * @param locationId
+   * @returns
    */
   private async createRecurringEvent(
-    tx: any,
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
     userId: number,
     eventData: EventData,
     recurring: RecurringData,
@@ -119,8 +114,8 @@ export class EventService {
       );
     const recurringEventId: number = recurringEvent.id;
 
-    // 실제 이벤트들 생성
-    const events = await this.createRecurringEventInstances(
+    // recurring 범위에 따라 실제 이벤트들 생성
+    const events = await this.createEventsByRecurring(
       tx,
       userId,
       eventData,
@@ -133,10 +128,13 @@ export class EventService {
   }
 
   /**
-   * 반복 이벤트 인스턴스들 생성
+   * 이벤트 인스턴스들 생성
    */
-  private async createRecurringEventInstances(
-    tx: any,
+  private async createEventsByRecurring(
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
     userId: number,
     eventData: EventData,
     recurring: RecurringData,
@@ -144,12 +142,12 @@ export class EventService {
     locationId?: number,
   ): Promise<Event[]> {
     const startDate = new Date(recurring.startDate);
-    const endDate = recurring.endDate ? new Date(recurring.endDate) : null;
-    const originalStart = new Date(eventData.startTime);
-    const originalEnd = new Date(eventData.endTime);
+    const endDate = recurring.endDate ? new Date(recurring.endDate) : undefined;
+    const originalStart = eventData.startTime; // 이미 문자열
+    const originalEnd = eventData.endTime;     // 이미 문자열
 
     // 반복 날짜들 생성
-    const recurringDates = this.generateRecurringDates(
+    const recurringDates: Date[] = this.generateRecurringDates(
       recurring.rule,
       startDate,
       endDate,
@@ -164,17 +162,15 @@ export class EventService {
         recurringDate,
       );
 
-      const event: Event = await tx.event.create({
-        data: {
-          ...eventData,
-          startTime: newStart,
-          endTime: newEnd,
-          isAllDay: eventData.isAllDay || false,
-          userId,
-          locationId,
-          recurringEventId,
-        },
-      });
+      const event: Event = await this.eventRepository.createEventByTransaction(
+        tx,
+        userId,
+        recurringEventId,
+        eventData,
+        newStart,
+        newEnd,
+        locationId,
+      );
 
       events.push(event);
     }
@@ -192,7 +188,7 @@ export class EventService {
   private generateRecurringDates(
     rruleString: string,
     startDate: Date,
-    endDate: Date | null,
+    endDate?: Date,
   ): Date[] {
     try {
       // endDate가 없으면 6개월 후까지 생성
@@ -211,27 +207,27 @@ export class EventService {
   }
 
   /**
-   * 개별 이벤트의 시작/종료 시간 계산
-   * @param originalStart 원래 시작 시간
-   * @param originalEnd 원래 종료 시간
-   * @param newDate 새로운 날짜
-   * @returns 새로운 시작/종료 시간
+   * 개별 이벤트의 시작/종료 시간 계산 (문자열 형태)
+   * @param originalStart 원래 시작 시간 "2025-09-01 19:30"
+   * @param originalEnd 원래 종료 시간 "2025-09-01 21:00"
+   * @param newDate 새로운 날짜 (RRULE에서 생성된 Date)
+   * @returns 새로운 시작/종료 시간 문자열
    */
   private calculateEventTimes(
-    originalStart: Date,
-    originalEnd: Date,
+    originalStart: string,
+    originalEnd: string,
     newDate: Date,
   ) {
-    const originalDuration = originalEnd.getTime() - originalStart.getTime();
-
-    const newStart = new Date(newDate);
-    newStart.setHours(
-      originalStart.getHours(),
-      originalStart.getMinutes(),
-      originalStart.getSeconds(),
-    );
-
-    const newEnd = new Date(newStart.getTime() + originalDuration);
+    // 원본 시간 부분 추출 ("19:30", "21:00")
+    const startTimePart = originalStart.split(' ')[1]; // "19:30"
+    const endTimePart = originalEnd.split(' ')[1];     // "21:00"
+    
+    // 새로운 날짜를 YYYY-MM-DD 형식으로 변환
+    const newDateStr = newDate.toISOString().split('T')[0]; // "2025-09-15"
+    
+    // 새로운 날짜 + 기존 시간 조합
+    const newStart = `${newDateStr} ${startTimePart}`;
+    const newEnd = `${newDateStr} ${endTimePart}`;
 
     return { newStart, newEnd };
   }

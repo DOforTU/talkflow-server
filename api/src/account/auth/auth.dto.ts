@@ -7,6 +7,8 @@ import {
   MinLength,
   Matches,
 } from 'class-validator';
+import { ResponseProfileDto } from '../profile/profile.dto';
+import { ResponseUserDto } from '../user/user.dto';
 
 /** Cookie type definition */
 export interface AuthCookies {
@@ -64,10 +66,6 @@ export interface CreateProfileDto {
   avatarUrl: string;
 }
 
-export interface UserWithProfile extends User {
-  profile: Profile | null;
-}
-
 // ===== HTTP 요청에서 사용되는 DTO: 데코레이터 필수 =====
 
 export class CompleteOnboardingDto {
@@ -92,4 +90,10 @@ export class CompleteOnboardingDto {
 
   @IsIn(['ko', 'en'])
   language: profile_language_enum;
+}
+
+// ===== 서버가 클라이언트에게 응답하는 프로필 정보 DTO =====
+
+export interface UserWithProfile extends ResponseUserDto {
+  profile: ResponseProfileDto | null;
 }
