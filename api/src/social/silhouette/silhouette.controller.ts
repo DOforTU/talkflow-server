@@ -16,6 +16,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class SilhouetteController {
   constructor(private readonly silhouetteService: SilhouetteService) {}
 
+  // TODO: CreateSilhouettesDto에 isPublic도 적용
+  // TODO: JwtAuthGuard -> OnBoardingGuard
+  // TODO: 테스트 - 로그인 안한 경우, 로그인 했지만 온보딩 안한경우, contentUrl이 없을 경우
+  // TODO: isPublic만 업데이트하는 api
+  // TODO: softDelete
   @Post('create')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
