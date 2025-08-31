@@ -74,6 +74,11 @@ export class EventService {
     );
   }
 
+  // ===== READ =====
+  async getMyEvents(userId: number): Promise<Event[]> {
+    return this.eventRepository.findEventsByUserId(userId);
+  }
+
   // ===== Sub Functions =====
 
   /**

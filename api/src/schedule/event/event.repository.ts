@@ -7,6 +7,8 @@ import { EventData } from './event.dto';
 export class EventRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+  // ===== CREATE =====
+
   async createSingleEvent(
     userId: number,
     eventData: EventData,
@@ -46,6 +48,14 @@ export class EventRepository {
         locationId,
         recurringEventId,
       },
+    });
+  }
+
+  // ===== READ =====
+
+  async findEventsByUserId(userId: number): Promise<Event[]> {
+    return await this.prismaService.event.findMany({
+      where: { userId },
     });
   }
 }

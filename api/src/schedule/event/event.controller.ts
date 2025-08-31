@@ -1,5 +1,12 @@
 import { User, Event } from '@prisma/client';
-import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './event.dto';
 import { JwtAuthGuard } from 'src/account/auth/jwt';
@@ -23,5 +30,10 @@ export class EventController {
       req.user.id,
       createEventDto,
     );
+  }
+
+  @Get()
+  async getMyEvents(@Request() req: { user: User }): Promise<Event[]> {
+    return await this.eventService.getMyEvents(req.user.id);
   }
 }
