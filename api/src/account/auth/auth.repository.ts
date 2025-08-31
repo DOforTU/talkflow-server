@@ -16,8 +16,29 @@ export class AuthRepository {
     userId: number,
   ): Promise<UserWithProfile | null> {
     return await this.prisma.user.findFirst({
-      where: { id: userId, deletedAt: null },
-      include: { profile: true },
+      where: { id: userId, deletedAt: null, profile: { deletedAt: null } },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        oauthId: true,
+        role: true,
+        provider: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+        lastLogin: true,
+        profile: {
+          select: {
+            id: true,
+            nickname: true,
+            avatarUrl: true,
+            language: true,
+            bio: true,
+          },
+        },
+      },
     });
   }
 
