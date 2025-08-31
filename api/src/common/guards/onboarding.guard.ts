@@ -29,15 +29,17 @@ export class OnBoardingGuard extends JwtAuthGuard {
     if (!user) throw new UnauthorizedException('User not found in request');
 
     // language null 체크 및 firstName, lastName 빈문자열 체크
-    if (!profile || !profile.language) console.log(request.user.profile);
-    throw new ForbiddenException('Language not set');
+    if (!profile || !profile.language) {
+      throw new ForbiddenException('Language not set');
+    }
     if (
       !user.firstName ||
       !user.lastName ||
       user.firstName.trim() === '' ||
       user.lastName.trim() === ''
-    )
+    ) {
       throw new ForbiddenException('First name or last name is empty');
+    }
     return true;
   }
 }
