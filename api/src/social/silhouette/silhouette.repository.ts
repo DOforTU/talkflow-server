@@ -7,6 +7,8 @@ import { CreateSilhouettesDto } from './silhoutette.dto';
 export class SilhouetteRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  // ----- CREATE -----
+
   async createSilhouette(
     profileId: number,
     createSilhouettesDto: CreateSilhouettesDto,
@@ -17,9 +19,29 @@ export class SilhouetteRepository {
     });
   }
 
+  // ----- READ -----
+
   async findById(id: number): Promise<Silhouette | null> {
     return await this.prisma.silhouette.findFirst({
       where: { id, deletedAt: null },
+    });
+  }
+
+  // ----- UPDATE -----
+
+  async updateIsPublic(id: number, isPublic: boolean): Promise<Silhouette> {
+    return await this.prisma.silhouette.update({
+      where: { id },
+      data: { isPublic },
+    });
+  }
+
+  // ----- DELETE -----
+
+  async deleteSilhouette(id: number): Promise<Silhouette> {
+    return await this.prisma.silhouette.update({
+      where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 }

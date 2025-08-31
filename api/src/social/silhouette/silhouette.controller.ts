@@ -1,16 +1,16 @@
 import {
   Body,
   Controller,
+  Param,
+  Patch,
   Post,
   Request,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { SilhouetteService } from './silhouette.service';
-import { JwtAuthGuard } from 'src/account/auth/jwt';
 import { Silhouette, User } from '@prisma/client';
 import { CreateSilhouettesDto } from './silhoutette.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 
 @Controller('silhouette')
 export class SilhouetteController {
@@ -22,8 +22,7 @@ export class SilhouetteController {
   // TODO: isPublic만 업데이트하는 api
   // TODO: softDelete
   @Post('create')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(OnBoardingGuard)
   async createSilhouettes(
     @Request() req: { user: User },
     @Body() createSilhouetteDto: CreateSilhouettesDto,
@@ -32,5 +31,29 @@ export class SilhouetteController {
       req.user.id,
       createSilhouetteDto,
     );
+  }
+
+  // ----- UPDATE -----
+
+  @Patch('update/:id')
+  @UseGuards(OnBoardingGuard)
+  async updateIsPublic(
+    @Param('id') id: number,
+    @Body('isPublic') isPublic: boolean,
+  ): Promise<Silhouette> {
+    return await this.silhouetteService.updateIsPublic(id, isPublic);
+  }
+
+  // ----- DELETE -----
+  /**
+   * @param req
+   * @param updateSilhouetteDto
+   * @returns
+   * 삭제하기 위함 soft delete
+   */
+  @Patch('update/:id')
+  @UseGuards(OnBoardingGuard)
+  async deleteSilhouettes(@Request() req: { user: User }): Promise<Silhouette> {
+    return await this.silhouetteService.deleteSilhouettes(req.user.id);
   }
 }
