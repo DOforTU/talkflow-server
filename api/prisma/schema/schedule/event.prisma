@@ -9,6 +9,7 @@ model Event{
   endTime     DateTime  @db.Timestamp(6)
   isAllDay    Boolean   @default(false)
   colorCode   String    @db.VarChar(7)
+  version     Int       @default(1)
 
   // Relations 
   userId            Int
@@ -39,6 +40,7 @@ model RecurringEvent{
   title       String    @db.VarChar
   description String?   @db.VarChar
   colorCode   String    @db.VarChar(7)
+  version     Int       @default(1)
 
   // Relation
   userId      Int

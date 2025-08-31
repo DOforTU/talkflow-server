@@ -78,6 +78,7 @@ export class ResponseEventDto {
   endTime: Date;
   isAllDay: boolean;
   colorCode: string;
+  version: number;
 
   // time columns
   createdAt: Date;

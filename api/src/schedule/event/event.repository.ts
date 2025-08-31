@@ -64,6 +64,7 @@ export class EventRepository {
         endTime: true,
         isAllDay: true,
         colorCode: true,
+        version: true,
 
         // time columns
         createdAt: true,

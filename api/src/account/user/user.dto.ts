@@ -27,6 +27,9 @@ export class ResponseUserDto {
   oauthId: string | null;
   role: user_role_enum;
   provider: user_provider_enum;
+  version: number;
+
+  // timestamps
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;

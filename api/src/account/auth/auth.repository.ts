@@ -25,10 +25,15 @@ export class AuthRepository {
         oauthId: true,
         role: true,
         provider: true,
+        version: true,
+
+        // timestamps
         createdAt: true,
         updatedAt: true,
         deletedAt: true,
         lastLogin: true,
+
+        // relations
         profile: {
           select: {
             id: true,
@@ -36,6 +41,7 @@ export class AuthRepository {
             avatarUrl: true,
             language: true,
             bio: true,
+            version: true,
           },
         },
       },

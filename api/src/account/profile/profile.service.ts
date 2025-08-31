@@ -38,6 +38,7 @@ export class ProfileService {
       avatarUrl: profile.avatarUrl,
       language: profile.language,
       bio: profile.bio,
+      version: profile.version,
     };
   }
 
