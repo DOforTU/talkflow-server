@@ -1,4 +1,3 @@
-import { Event } from '@prisma/client';
 import {
   IsString,
   IsDateString,
@@ -79,6 +78,14 @@ export class ResponseEventDto {
   endTime: Date;
   isAllDay: boolean;
   colorCode: string;
+
+  // time columns
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+
+  // parts of relations
+  userId: number;
   location: ResponseLocationDto | null;
   recurringEventId: number | null;
 }

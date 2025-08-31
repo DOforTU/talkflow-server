@@ -55,7 +55,7 @@ export class EventRepository {
 
   async findEventsByUserId(userId: number): Promise<ResponseEventDto[]> {
     return await this.prismaService.event.findMany({
-      where: { userId },
+      where: { userId, deletedAt: null },
       select: {
         id: true,
         title: true,
@@ -64,6 +64,14 @@ export class EventRepository {
         endTime: true,
         isAllDay: true,
         colorCode: true,
+
+        // time columns
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+
+        // parts of relations
+        userId: true,
         location: {
           select: {
             id: true,
