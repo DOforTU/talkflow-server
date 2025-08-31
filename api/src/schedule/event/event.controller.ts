@@ -8,7 +8,7 @@ import {
   Get,
 } from '@nestjs/common';
 import { EventService } from './event.service';
-import { CreateEventDto } from './event.dto';
+import { CreateEventDto, ResponseEventDto } from './event.dto';
 import { JwtAuthGuard } from 'src/account/auth/jwt';
 
 @Controller('events')
@@ -33,7 +33,9 @@ export class EventController {
   }
 
   @Get()
-  async getMyEvents(@Request() req: { user: User }): Promise<Event[]> {
+  async getMyEvents(
+    @Request() req: { user: User },
+  ): Promise<ResponseEventDto[]> {
     return await this.eventService.getMyEvents(req.user.id);
   }
 }

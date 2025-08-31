@@ -24,3 +24,14 @@ export class CreateLocationDto {
   @IsNumber()
   longitude: number;
 }
+
+// ===== 서버가 클라이언트에게 응답하는 프로필 정보 DTO =====
+
+export class ResponseLocationDto {
+  id: number;
+  nameEn: string | null;
+  nameKo: string | null;
+  address: string;
+  latitude: number;
+  longitude: number;
+}

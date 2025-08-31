@@ -1,3 +1,4 @@
+import { Event } from '@prisma/client';
 import {
   IsString,
   IsDateString,
@@ -7,7 +8,10 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateLocationDto } from '../location/location.dto';
+import {
+  CreateLocationDto,
+  ResponseLocationDto,
+} from '../location/location.dto';
 import { CreateRecurringRuleDto } from '../recurring-event/recurring-event.dto';
 
 // ===== 클라이언트에서 서버로 POST api/event 요청 시 사용되는 DTO =====
@@ -64,4 +68,17 @@ export interface EventData {
   endTime: string;
   isAllDay: boolean;
   colorCode: string;
+}
+
+// ===== 서버가 클라이언트에게 응답하는 프로필 정보 DTO =====
+export class ResponseEventDto {
+  id: number;
+  title: string;
+  description: string | null;
+  startTime: Date;
+  endTime: Date;
+  isAllDay: boolean;
+  colorCode: string;
+  location: ResponseLocationDto | null;
+  recurringEventId: number | null;
 }

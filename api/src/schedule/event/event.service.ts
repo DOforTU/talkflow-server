@@ -1,12 +1,13 @@
 import { EventRepository } from './event.repository';
 import { Injectable } from '@nestjs/common';
-import { CreateEventDto, EventData } from './event.dto';
+import { CreateEventDto, EventData, ResponseEventDto } from './event.dto';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LocationService } from '../location/location.service';
 import { RecurringEventService } from '../recurring-event/recurring-event.service';
 import { RRule } from 'rrule';
-import { Event, Prisma } from '@prisma/client';
+import { Event, Location, Prisma } from '@prisma/client';
 import { RecurringData } from '../recurring-event/recurring-event.dto';
+import { ResponseLocationDto } from '../location/location.dto';
 
 @Injectable()
 export class EventService {
@@ -75,8 +76,8 @@ export class EventService {
   }
 
   // ===== READ =====
-  async getMyEvents(userId: number): Promise<Event[]> {
-    return this.eventRepository.findEventsByUserId(userId);
+  async getMyEvents(userId: number): Promise<ResponseEventDto[]> {
+    return await this.eventRepository.findEventsByUserId(userId);
   }
 
   // ===== Sub Functions =====

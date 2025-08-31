@@ -1,7 +1,7 @@
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Event, Prisma } from '@prisma/client';
-import { EventData } from './event.dto';
+import { EventData, ResponseEventDto } from './event.dto';
 
 @Injectable()
 export class EventRepository {
@@ -53,9 +53,29 @@ export class EventRepository {
 
   // ===== READ =====
 
-  async findEventsByUserId(userId: number): Promise<Event[]> {
+  async findEventsByUserId(userId: number): Promise<ResponseEventDto[]> {
     return await this.prismaService.event.findMany({
       where: { userId },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        startTime: true,
+        endTime: true,
+        isAllDay: true,
+        colorCode: true,
+        location: {
+          select: {
+            id: true,
+            nameKo: true,
+            nameEn: true,
+            address: true,
+            latitude: true,
+            longitude: true,
+          },
+        },
+        recurringEventId: true,
+      },
     });
   }
 }
