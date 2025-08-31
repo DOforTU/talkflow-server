@@ -8,47 +8,60 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateLocationDto } from '../location/location.dto';
+import { CreateRecurringRuleDto } from '../recurring-event/recurring-event.dto';
 
-export class CreateRecurringRuleDto {
-  @IsString()
-  rule: string; // RRULE format
-
-  @IsDateString()
-  startDate: string;
-
-  @IsOptional()
-  @IsDateString()
-  endDate?: string;
-}
+// ===== 클라이언트에서 서버로 POST api/event 요청 시 사용되는 DTO =====
 
 export class CreateEventDto {
   @IsString()
   title: string;
 
+  /**
+   * 클라이언트가 전송하지 않으면 undefined
+   */
   @IsOptional()
   @IsString()
   description?: string;
 
   @IsDateString()
-  startTime: string;
+  startTime: string; // ex) 2023-03-15T10:00:00Z
 
   @IsDateString()
-  endTime: string;
+  endTime: string; // ex) 2023-03-15T12:00:00Z
 
-  @IsOptional()
+  /**
+   * true라면 startTime: 2023-03-15T00:00:00Z, endTime: 2023-03-16T00:00:00Z
+   * 프론트에서 isAllDay true를 보낸다면 알아서 start/endTime을 위와 같이 보내기 때문에 예외처리 불필요
+   */
   @IsBoolean()
-  isAllDay?: boolean;
+  isAllDay: boolean;
 
   @IsHexColor()
   colorCode: string;
 
+  /**
+   * 클라이언트가 전송하지 않으면 undefined
+   */
   @IsOptional()
   @ValidateNested()
   @Type(() => CreateLocationDto)
-  location?: CreateLocationDto | null;
+  location?: CreateLocationDto;
 
+  /**
+   * 클라이언트가 전송하지 않으면 undefined
+   */
   @IsOptional()
   @ValidateNested()
   @Type(() => CreateRecurringRuleDto)
-  recurring?: CreateRecurringRuleDto | null;
+  recurring?: CreateRecurringRuleDto;
+}
+
+// ===== 서버 내부에서 사용되는 데이터 타입 정의 =====
+export interface EventData {
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  isAllDay: boolean;
+  colorCode: string;
 }

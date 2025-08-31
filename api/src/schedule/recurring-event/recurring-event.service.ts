@@ -1,18 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { RecurringEventRepository } from './recurring-event.repository';
-import { RecurringEvent } from '@prisma/client';
-import { RecurringData } from '../event/event.service';
-
-interface CreateRecurringEventData {
-  rule: string;
-  startDate: Date;
-  endDate?: Date;
-  title: string;
-  description?: string;
-  colorCode: string;
-  userId: number;
-  locationId?: number;
-}
+import { Prisma, RecurringEvent } from '@prisma/client';
+import { CreateRecurringEventData, RecurringData } from './recurring-event.dto';
+import { EventData } from '../event/event.dto';
 
 @Injectable()
 export class RecurringEventService {
@@ -30,9 +20,12 @@ export class RecurringEventService {
    * 트랜잭션 내에서 반복 일정 레코드 생성
    */
   async createRecurringEventWithTransaction(
-    tx: any,
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
     userId: number,
-    eventData: any,
+    eventData: EventData,
     recurring: RecurringData,
     locationId?: number,
   ): Promise<RecurringEvent> {
@@ -49,10 +42,6 @@ export class RecurringEventService {
         colorCode: eventData.colorCode,
         userId,
         locationId,
-      },
-      include: {
-        user: true,
-        location: true,
       },
     });
   }

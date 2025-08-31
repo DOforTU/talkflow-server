@@ -15,8 +15,10 @@ export class EventController {
     @Body() createEventDto: CreateEventDto,
   ): Promise<Event | Event[]> {
     if (createEventDto.recurring) {
+      // 반복 일정이라면 여러 이벤트 생성
       return await this.eventService.createEvents(req.user.id, createEventDto);
     }
+    // 반복 일정이 아니라면 단일 이벤트 생성
     return await this.eventService.createSingleEvent(
       req.user.id,
       createEventDto,
