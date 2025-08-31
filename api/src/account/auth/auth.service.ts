@@ -29,8 +29,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async getUserInfoById(userId: number): Promise<UserWithProfile> {
-    const user = await this.authRepository.findUserInfoById(userId);
+  async getUserWithProfileById(userId: number): Promise<UserWithProfile> {
+    const user = await this.authRepository.findUserWithProfileById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
