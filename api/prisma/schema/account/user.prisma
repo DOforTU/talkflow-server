@@ -1,0 +1,65 @@
+enum user_role_enum {
+  user
+  admin
+  super_admin
+}
+
+enum user_provider_enum {
+  local
+  google
+}
+
+
+model User {
+  // Primary Key
+  id  Int                       @id @default(autoincrement()) @db.Integer
+
+  // User Information
+  email     String              @db.VarChar
+  password  String?             @db.VarChar
+  firstName String              @db.VarChar
+  lastName  String              @db.VarChar
+  oauthId   String?             @db.VarChar
+  
+  // User Settings
+  role      user_role_enum      @default(user)
+  provider  user_provider_enum  @default(local)
+  lastLogin DateTime?           @db.Timestamp(6)
+  
+  // Timestamps (Common fields)
+  createdAt DateTime            @default(now()) @db.Timestamp(6)
+  updatedAt DateTime            @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt DateTime?           @db.Timestamp(6)
+  version   Int                 @default(1) @db.Integer
+
+  // Relations
+  profile     Profile?
+  event           Event[]
+  recurringEvent  RecurringEvent[]
+          
+
+  @@unique([email, deletedAt])
+  @@unique([oauthId, provider, deletedAt])
+  @@map("user")
+}
+
+
+model PendingUser {
+  // Primary Key
+  id               Int      @id @default(autoincrement()) @db.Integer
+  
+  // User Information
+  email            String   @unique @db.VarChar
+  password         String   @db.VarChar
+  firstName        String   @db.VarChar
+  lastName         String   @db.VarChar
+  
+  // Verification
+  verificationCode String   @db.VarChar
+  codeExpiresAt    DateTime @db.Timestamp(6)
+
+  // Timestamps
+  createdAt        DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("pending_user")
+}

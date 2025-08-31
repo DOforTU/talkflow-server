@@ -1,0 +1,56 @@
+model Event{
+  // Primary Key
+  id          Int       @id @default(autoincrement()) @db.Integer
+
+  // Event Information
+  title       String    @db.VarChar
+  description String?   @db.VarChar
+  startTime   DateTime  @db.Timestamp(6) 
+  endTime     DateTime  @db.Timestamp(6)
+  isAllDay    Boolean   @default(false)
+  colorCode   String    @db.VarChar(7)
+
+  // Relations 
+  userId            Int
+  user              User   @relation(fields: [userId], references: [id])
+  recurringEventId  Int?
+  recurringEvent    RecurringEvent? @relation(fields: [recurringEventId], references: [id])
+  locationId        Int?
+  location          Location? @relation(fields: [locationId], references: [id])
+
+  // Timestamps (Common fields)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt   DateTime? @db.Timestamp(6)
+
+
+
+  @@map("event")
+}
+
+model RecurringEvent{
+  // Primary Key
+  id          Int       @id @default(autoincrement()) @db.Integer
+
+  // Recurring Event Information
+  rule        String    @db.VarChar(255)
+  startDate   DateTime  @db.Timestamp(6) 
+  endDate     DateTime? @db.Timestamp(6) 
+  title       String    @db.VarChar
+  description String?   @db.VarChar
+  colorCode   String    @db.VarChar(7)
+
+  // Relation
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  locationId  Int?
+  location    Location? @relation(fields: [locationId], references: [id])
+  events      Event[]
+
+  // Timestamps (Common fields)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt   DateTime? @db.Timestamp(6)
+
+  @@map("recurring_event")
+}

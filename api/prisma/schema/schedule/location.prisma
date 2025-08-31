@@ -1,0 +1,23 @@
+
+model Location {
+  // Primary Key
+  id              Int       @id @default(autoincrement()) @db.Integer
+
+  // Location Information
+  nameEn          String?    @db.VarChar
+  nameKo          String?    @db.VarChar
+  address         String    @db.VarChar
+  latitude        Float     @db.DoublePrecision()
+  longitude       Float     @db.DoublePrecision()
+
+  // Relations
+  events          Event[]
+  recurringEvents RecurringEvent[]
+
+  // Timestamps (Common fields)
+  createdAt       DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt       DateTime? @db.Timestamp(6)
+
+  @@map("location")
+}

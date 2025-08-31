@@ -1,0 +1,27 @@
+
+enum content_enum {
+  image
+  video
+}
+
+model Silhouette {
+  // Primary Key
+  id          Int       @id @default(autoincrement()) @db.Integer
+
+  // Silhouette Information
+  contentUrl       String    @db.VarChar
+  type    content_enum?
+  runningTime Float  @db.DoublePrecision() @default(15.0)
+
+  profileId Int
+  profile   Profile   @relation(fields: [profileId], references: [id])
+
+  // Timestamps (Common fields)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt   DateTime? @db.Timestamp(6)
+
+  likes       SilhouetteLike[]
+
+  @@map("silhouette")
+}

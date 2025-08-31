@@ -1,0 +1,33 @@
+
+enum profile_language_enum {
+  ko
+  en
+}
+
+
+
+model Profile {
+  // Primary Key
+  id        Int                     @id @default(autoincrement()) @db.Integer
+
+  // Profile Information
+  nickname  String                  @db.VarChar
+  avatarUrl String                  @db.VarChar
+  bio       String?
+  language  profile_language_enum?
+
+  // Timestamps (Common fields)
+  createdAt DateTime                @default(now()) @db.Timestamp(6)
+  updatedAt DateTime                @default(now()) @updatedAt @db.Timestamp(6)
+  deletedAt DateTime?               @db.Timestamp(6)
+  version   Int                     @default(1) @db.Integer
+
+  // Relations
+  userId    Int                    @unique @db.Integer
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  silhouettes  Silhouette[]
+  likes     SilhouetteLike[]  
+
+  @@unique([nickname, deletedAt])
+  @@map("profile")
+}
