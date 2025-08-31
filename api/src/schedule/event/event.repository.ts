@@ -17,8 +17,8 @@ export class EventRepository {
     return await this.prismaService.event.create({
       data: {
         ...eventData,
-        startTime: new Date(eventData.startTime),
-        endTime: new Date(eventData.endTime),
+        startTime: eventData.startTime, // 이미 문자열 형태
+        endTime: eventData.endTime, // 이미 문자열 형태
         isAllDay: eventData.isAllDay,
         userId,
         locationId,
@@ -34,15 +34,15 @@ export class EventRepository {
     userId: number,
     recurringEventId: number,
     eventData: EventData,
-    newStart: Date,
-    newEnd: Date,
+    newStart: string, // 문자열로 변경
+    newEnd: string, // 문자열로 변경
     locationId?: number,
   ): Promise<Event> {
     return await tx.event.create({
       data: {
         ...eventData,
-        startTime: newStart,
-        endTime: newEnd,
+        startTime: newStart, // 이미 문자열 형태
+        endTime: newEnd, // 이미 문자열 형태
         isAllDay: eventData.isAllDay,
         userId,
         locationId,

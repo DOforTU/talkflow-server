@@ -24,14 +24,14 @@ export class CreateRecurringRuleDto {
 // 반복 규칙 타입 정의
 export interface RecurringData {
   rule: string;
-  startDate: string;
-  endDate?: string | null;
+  startDate: string; // "2025-09-01" 형식
+  endDate?: string;  // "2025-09-30" 형식
 }
 
 export interface CreateRecurringEventData {
   rule: string;
-  startDate: Date;
-  endDate?: Date;
+  startDate: string; // "2025-09-01" 형식
+  endDate?: string;  // "2025-09-30" 형식
   title: string;
   description?: string;
   colorCode: string;

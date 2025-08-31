@@ -29,14 +29,11 @@ export class RecurringEventService {
     recurring: RecurringData,
     locationId?: number,
   ): Promise<RecurringEvent> {
-    const startDate = new Date(recurring.startDate);
-    const endDate = recurring.endDate ? new Date(recurring.endDate) : null;
-
     return await tx.recurringEvent.create({
       data: {
         rule: recurring.rule,
-        startDate,
-        endDate,
+        startDate: recurring.startDate, // 이미 문자열
+        endDate: recurring.endDate || null,
         title: eventData.title,
         description: eventData.description,
         colorCode: eventData.colorCode,

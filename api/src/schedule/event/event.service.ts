@@ -143,8 +143,8 @@ export class EventService {
   ): Promise<Event[]> {
     const startDate = new Date(recurring.startDate);
     const endDate = recurring.endDate ? new Date(recurring.endDate) : undefined;
-    const originalStart = new Date(eventData.startTime);
-    const originalEnd = new Date(eventData.endTime);
+    const originalStart = eventData.startTime; // 이미 문자열
+    const originalEnd = eventData.endTime;     // 이미 문자열
 
     // 반복 날짜들 생성
     const recurringDates: Date[] = this.generateRecurringDates(
@@ -207,28 +207,27 @@ export class EventService {
   }
 
   /**
-   * 개별 이벤트의 시작/종료 시간 계산
-   * 시간은 동일해도 날짜가 다를 수 있기에 필요
-   * @param originalStart 원래 시작 시간
-   * @param originalEnd 원래 종료 시간
-   * @param newDate 새로운 날짜
-   * @returns 새로운 시작/종료 시간
+   * 개별 이벤트의 시작/종료 시간 계산 (문자열 형태)
+   * @param originalStart 원래 시작 시간 "2025-09-01 19:30"
+   * @param originalEnd 원래 종료 시간 "2025-09-01 21:00"
+   * @param newDate 새로운 날짜 (RRULE에서 생성된 Date)
+   * @returns 새로운 시작/종료 시간 문자열
    */
   private calculateEventTimes(
-    originalStart: Date,
-    originalEnd: Date,
+    originalStart: string,
+    originalEnd: string,
     newDate: Date,
   ) {
-    const originalDuration = originalEnd.getTime() - originalStart.getTime();
-
-    const newStart = new Date(newDate);
-    newStart.setHours(
-      originalStart.getHours(),
-      originalStart.getMinutes(),
-      originalStart.getSeconds(),
-    );
-
-    const newEnd = new Date(newStart.getTime() + originalDuration);
+    // 원본 시간 부분 추출 ("19:30", "21:00")
+    const startTimePart = originalStart.split(' ')[1]; // "19:30"
+    const endTimePart = originalEnd.split(' ')[1];     // "21:00"
+    
+    // 새로운 날짜를 YYYY-MM-DD 형식으로 변환
+    const newDateStr = newDate.toISOString().split('T')[0]; // "2025-09-15"
+    
+    // 새로운 날짜 + 기존 시간 조합
+    const newStart = `${newDateStr} ${startTimePart}`;
+    const newEnd = `${newDateStr} ${endTimePart}`;
 
     return { newStart, newEnd };
   }

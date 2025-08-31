@@ -5,8 +5,8 @@ model Event{
   // Event Information
   title       String    @db.VarChar
   description String?   @db.VarChar
-  startTime   DateTime  @db.Timestamp(6) 
-  endTime     DateTime  @db.Timestamp(6)
+  startTime   String    @db.VarChar(16) // "2025-09-01 19:30" 형식
+  endTime     String    @db.VarChar(16) // "2025-09-01 21:00" 형식
   isAllDay    Boolean   @default(false)
   colorCode   String    @db.VarChar(7)
   version     Int       @default(1)
@@ -35,8 +35,8 @@ model RecurringEvent{
 
   // Recurring Event Information
   rule        String    @db.VarChar(255)
-  startDate   DateTime  @db.Timestamp(6) 
-  endDate     DateTime? @db.Timestamp(6) 
+  startDate   String    @db.VarChar(10) // "2025-09-01" 형식
+  endDate     String?   @db.VarChar(10) // "2025-09-30" 형식
   title       String    @db.VarChar
   description String?   @db.VarChar
   colorCode   String    @db.VarChar(7)
