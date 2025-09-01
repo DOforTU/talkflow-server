@@ -199,7 +199,14 @@ export class EventService {
         `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${rruleString}`,
       );
 
-      return rule.between(startDate, defaultEndDate, true);
+      // between 대신 all을 사용하되 UNTIL로 제한하거나, after로 시작일 포함
+      if (endDate) {
+        // 종료일이 있으면 해당 범위에서 생성 (시작일 포함)
+        return rule.all((date, i) => date <= defaultEndDate);
+      } else {
+        // 종료일이 없으면 최대 100개까지만 생성 (무한 생성 방지)
+        return rule.all((date, i) => i < 100 && date <= defaultEndDate);
+      }
     } catch (error) {
       console.error('Error parsing RRULE:', error);
       return [startDate]; // 파싱 실패시 원래 날짜만 반환
