@@ -113,7 +113,7 @@ export class EventRepository {
 
   async deleteSingleEvent(userId: number, eventId: number): Promise<void> {
     // Soft delete a single event (verify ownership)
-    await this.prismaService.event.updateMany({
+    await this.prismaService.event.update({
       where: {
         id: eventId,
         userId: userId,
