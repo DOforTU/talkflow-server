@@ -49,6 +49,32 @@ export class SilhouetteService {
     throw new BadRequestException('Invalid content URL');
   }
 
+  // ----- UPDATE -----
+
+  // isPublic 업데이트 -> silhouetteId로 실루엣 찾기 -> 있으면 공개로 할지 비공개로 할지 업데이트
+  async updateIsPublic(
+    silhouetteId: number,
+    isPublic: boolean,
+  ): Promise<Silhouette> {
+    const silhouette = await this.silhouetteRepository.findById(silhouetteId);
+    if (!silhouette) {
+      throw new NotFoundException('Silhouette not found for user');
+    }
+    return await this.silhouetteRepository.updateIsPublic(
+      silhouetteId,
+      isPublic,
+    );
+  }
+  // ----- DELETE -----
+
+  async deleteSilhouettes(silhouetteId: number): Promise<Silhouette> {
+    const silhouette = await this.silhouetteRepository.findById(silhouetteId);
+    if (!silhouette) {
+      throw new NotFoundException('Silhouette not found for user');
+    }
+    return await this.silhouetteRepository.deleteSilhouette(silhouetteId);
+  }
+
   // ----- SUB FUNCTION -----
 
   async getSilhouetteById(id: number): Promise<Silhouette> {
