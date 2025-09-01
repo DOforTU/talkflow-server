@@ -83,7 +83,86 @@ export class EventRepository {
             longitude: true,
           },
         },
+        recurringEvent: {
+          select: {
+            id: true,
+            rule: true,
+            startDate: true,
+            endDate: true,
+            title: true,
+            description: true,
+            colorCode: true,
+            version: true,
+            location: {
+              select: {
+                id: true,
+                nameKo: true,
+                nameEn: true,
+                address: true,
+                latitude: true,
+                longitude: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // ===== DELETE =====
+
+  async deleteSingleEvent(userId: number, eventId: number): Promise<void> {
+    // Soft delete a single event (verify ownership)
+    await this.prismaService.event.updateMany({
+      where: {
+        id: eventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  }
+
+  async deleteRecurringEvents(userId: number, eventId: number): Promise<void> {
+    // First, find the event to get the recurringEventId
+    const event = await this.prismaService.event.findFirst({
+      where: {
+        id: eventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      select: {
         recurringEventId: true,
+      },
+    });
+
+    if (!event?.recurringEventId) {
+      throw new Error('Event is not part of a recurring series');
+    }
+
+    // Soft delete all events in the recurring series
+    await this.prismaService.event.updateMany({
+      where: {
+        recurringEventId: event.recurringEventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    // Also soft delete the recurring event metadata
+    await this.prismaService.recurringEvent.updateMany({
+      where: {
+        id: event.recurringEventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     });
   }

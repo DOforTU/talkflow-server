@@ -80,6 +80,15 @@ export class EventService {
     return await this.eventRepository.findEventsByUserId(userId);
   }
 
+  // ===== DELETE =====
+  async deleteSingleEvent(userId: number, eventId: number): Promise<void> {
+    return await this.eventRepository.deleteSingleEvent(userId, eventId);
+  }
+
+  async deleteRecurringEvents(userId: number, eventId: number): Promise<void> {
+    return await this.eventRepository.deleteRecurringEvents(userId, eventId);
+  }
+
   // ===== Sub Functions =====
 
   /**
@@ -144,7 +153,7 @@ export class EventService {
     const startDate = new Date(recurring.startDate);
     const endDate = recurring.endDate ? new Date(recurring.endDate) : undefined;
     const originalStart = eventData.startTime; // 이미 문자열
-    const originalEnd = eventData.endTime;     // 이미 문자열
+    const originalEnd = eventData.endTime; // 이미 문자열
 
     // 반복 날짜들 생성
     const recurringDates: Date[] = this.generateRecurringDates(
@@ -227,11 +236,11 @@ export class EventService {
   ) {
     // 원본 시간 부분 추출 ("19:30", "21:00")
     const startTimePart = originalStart.split(' ')[1]; // "19:30"
-    const endTimePart = originalEnd.split(' ')[1];     // "21:00"
-    
+    const endTimePart = originalEnd.split(' ')[1]; // "21:00"
+
     // 새로운 날짜를 YYYY-MM-DD 형식으로 변환
     const newDateStr = newDate.toISOString().split('T')[0]; // "2025-09-15"
-    
+
     // 새로운 날짜 + 기존 시간 조합
     const newStart = `${newDateStr} ${startTimePart}`;
     const newEnd = `${newDateStr} ${endTimePart}`;

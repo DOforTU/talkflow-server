@@ -6,6 +6,9 @@ import {
   Request,
   UseGuards,
   Get,
+  Delete,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto, ResponseEventDto } from './event.dto';
@@ -37,5 +40,21 @@ export class EventController {
     @Request() req: { user: User },
   ): Promise<ResponseEventDto[]> {
     return await this.eventService.getMyEvents(req.user.id);
+  }
+
+  @Delete(':id')
+  async deleteSingleEvent(
+    @Request() req: { user: User },
+    @Param('id', ParseIntPipe) eventId: number,
+  ): Promise<void> {
+    return await this.eventService.deleteSingleEvent(req.user.id, eventId);
+  }
+
+  @Delete(':id/recurring/all')
+  async deleteRecurringEvents(
+    @Request() req: { user: User },
+    @Param('id', ParseIntPipe) eventId: number,
+  ): Promise<void> {
+    return await this.eventService.deleteRecurringEvents(req.user.id, eventId);
   }
 }

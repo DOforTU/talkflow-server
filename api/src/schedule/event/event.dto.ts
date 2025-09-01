@@ -12,7 +12,10 @@ import {
   CreateLocationDto,
   ResponseLocationDto,
 } from '../location/location.dto';
-import { CreateRecurringRuleDto } from '../recurring-event/recurring-event.dto';
+import {
+  CreateRecurringRuleDto,
+  ResponseRecurringDto,
+} from '../recurring-event/recurring-event.dto';
 
 // ===== 클라이언트에서 서버로 POST api/event 요청 시 사용되는 DTO =====
 
@@ -76,7 +79,7 @@ export interface EventData {
   colorCode: string;
 }
 
-// ===== 서버가 클라이언트에게 응답하는 프로필 정보 DTO =====
+// ===== 서버가 클라이언트에게 응답하는 정보 DTO =====
 export class ResponseEventDto {
   id: number;
   title: string;
@@ -95,5 +98,5 @@ export class ResponseEventDto {
   // parts of relations
   userId: number;
   location: ResponseLocationDto | null;
-  recurringEventId: number | null;
+  recurringEvent: ResponseRecurringDto | null;
 }
