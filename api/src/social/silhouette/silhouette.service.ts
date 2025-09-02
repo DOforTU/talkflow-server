@@ -62,7 +62,12 @@ export class SilhouetteService {
   async findPubicSilhouetteOrederByLike(
     limit: number = 20,
     offset: number = 0,
-  ) {}
+  ): Promise<ResponseSilhouette[]> {
+    return await this.silhouetteRepository.findPublicSilhouettesOrderByLike(
+      limit,
+      offset,
+    );
+  }
 
   // ----- UPDATE -----
 

@@ -34,7 +34,11 @@ export class SilhouetteRepository {
     // 먼저 실루엣 ID만 가져오기
     const silhouetteIds = await this.prisma.silhouette.findMany({
       // TODO: 오늘 기준 createdAt 30일 이내
-      where: { isPublic: true, deletedAt: null },
+      where: {
+        isPublic: true,
+        deletedAt: null,
+        createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+      },
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip: offset,
@@ -59,6 +63,36 @@ export class SilhouetteRepository {
       return [];
     }
     return silhouetteIds;
+  }
+
+  async findPublicSilhouettesOrderByLike(
+    limit: number = 20,
+    offset: number = 0,
+  ): Promise<ResponseSilhouette[]> {
+    return await this.prisma.silhouette.findMany({
+      where: {
+        isPublic: true,
+        deletedAt: null,
+        createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+      },
+      orderBy: {
+        likes: {
+          _count: 'desc', // 좋아요 수 내림차순
+        },
+      },
+      take: limit,
+      skip: offset,
+      include: {
+        likes: {
+          where: {
+            createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+          },
+        },
+        profile: {
+          select: { id: true, nickname: true, avatarUrl: true },
+        },
+      },
+    });
   }
 
   // ----- UPDATE -----
