@@ -1,6 +1,10 @@
 import { EventRepository } from './event.repository';
-import { Injectable } from '@nestjs/common';
-import { CreateEventDto, EventData, ResponseEventDto } from './event.dto';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { CreateEventDto, EventData, EventDetailDto } from './event.dto';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LocationService } from '../location/location.service';
 import { RecurringEventService } from '../recurring-event/recurring-event.service';
@@ -76,8 +80,44 @@ export class EventService {
   }
 
   // ===== READ =====
-  async getMyEvents(userId: number): Promise<ResponseEventDto[]> {
+  async getMyEvents(userId: number): Promise<EventDetailDto[]> {
     return await this.eventRepository.findEventsByUserId(userId);
+  }
+
+  async getEventByIdAndUserId(eventId: number, userId: number): Promise<Event> {
+    const event = await this.eventRepository.findByIdAndUserId(eventId, userId);
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    return event;
+  }
+
+  // ===== DELETE =====
+  /**
+   * 단일 이벤트 삭제
+   * @param userId
+   * @param eventId
+   * @returns
+   */
+  async deleteSingleEvent(userId: number, eventId: number): Promise<Event> {
+    return await this.eventRepository.deleteSingleEvent(userId, eventId);
+  }
+
+  /**
+   * 반복 이벤트 삭제 및 관련된 일정 모두 삭제
+   * @param userId
+   * @param eventId
+   * @returns
+   */
+  async deleteRecurringEvents(userId: number, eventId: number): Promise<void> {
+    const event = await this.getEventByIdAndUserId(eventId, userId);
+    if (!event.recurringEventId) {
+      throw new BadRequestException('Event is not part of a recurring series');
+    }
+    return await this.eventRepository.deleteRecurringEvents(
+      userId,
+      event.recurringEventId,
+    );
   }
 
   // ===== Sub Functions =====
@@ -144,7 +184,7 @@ export class EventService {
     const startDate = new Date(recurring.startDate);
     const endDate = recurring.endDate ? new Date(recurring.endDate) : undefined;
     const originalStart = eventData.startTime; // 이미 문자열
-    const originalEnd = eventData.endTime;     // 이미 문자열
+    const originalEnd = eventData.endTime; // 이미 문자열
 
     // 반복 날짜들 생성
     const recurringDates: Date[] = this.generateRecurringDates(
@@ -199,7 +239,14 @@ export class EventService {
         `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${rruleString}`,
       );
 
-      return rule.between(startDate, defaultEndDate, true);
+      // between 대신 all을 사용하되 UNTIL로 제한하거나, after로 시작일 포함
+      if (endDate) {
+        // 종료일이 있으면 해당 범위에서 생성 (시작일 포함)
+        return rule.all((date, i) => date <= defaultEndDate);
+      } else {
+        // 종료일이 없으면 최대 100개까지만 생성 (무한 생성 방지)
+        return rule.all((date, i) => i < 100 && date <= defaultEndDate);
+      }
     } catch (error) {
       console.error('Error parsing RRULE:', error);
       return [startDate]; // 파싱 실패시 원래 날짜만 반환
@@ -220,11 +267,11 @@ export class EventService {
   ) {
     // 원본 시간 부분 추출 ("19:30", "21:00")
     const startTimePart = originalStart.split(' ')[1]; // "19:30"
-    const endTimePart = originalEnd.split(' ')[1];     // "21:00"
-    
+    const endTimePart = originalEnd.split(' ')[1]; // "21:00"
+
     // 새로운 날짜를 YYYY-MM-DD 형식으로 변환
     const newDateStr = newDate.toISOString().split('T')[0]; // "2025-09-15"
-    
+
     // 새로운 날짜 + 기존 시간 조합
     const newStart = `${newDateStr} ${startTimePart}`;
     const newEnd = `${newDateStr} ${endTimePart}`;

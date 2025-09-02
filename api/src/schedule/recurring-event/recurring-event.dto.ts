@@ -1,4 +1,6 @@
+import { Location } from '@prisma/client';
 import { IsDateString, IsOptional, IsString } from 'class-validator';
+import { ResponseLocationDto } from '../location/location.dto';
 
 // ===== 클라이언트에서 서버로 POST api/event 요청 시 사용되는 DTO =====
 
@@ -25,16 +27,30 @@ export class CreateRecurringRuleDto {
 export interface RecurringData {
   rule: string;
   startDate: string; // "2025-09-01" 형식
-  endDate?: string;  // "2025-09-30" 형식
+  endDate?: string; // "2025-09-30" 형식
 }
 
 export interface CreateRecurringEventData {
   rule: string;
   startDate: string; // "2025-09-01" 형식
-  endDate?: string;  // "2025-09-30" 형식
+  endDate?: string; // "2025-09-30" 형식
   title: string;
   description?: string;
   colorCode: string;
   userId: number;
   locationId?: number;
+}
+
+// ===== 서버가 클라이언트에게 응답하는 정보 DTO =====
+
+export class ResponseRecurringDto {
+  id: number;
+  rule: string;
+  startDate: string; // "2025-09-01" 형식
+  endDate: string | null; // "2025-09-30" 형식
+  title: string;
+  description: string | null;
+  colorCode: string;
+  version: number;
+  location: ResponseLocationDto | null;
 }

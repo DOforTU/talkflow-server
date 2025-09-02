@@ -9,11 +9,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/account/auth/jwt';
-import { ProfileService } from 'src/account/profile/profile.service';
 
 @Injectable()
 export class OnBoardingGuard extends JwtAuthGuard {
-  constructor(readonly profileService: ProfileService) {
+  constructor() {
     super();
   }
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,8 +24,9 @@ export class OnBoardingGuard extends JwtAuthGuard {
     // request에서 user 정보 가져오기
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    const profile = await this.profileService.getProfileByUserId(user.id);
     if (!user) throw new UnauthorizedException('User not found in request');
+
+    const profile = user.profile;
 
     // language null 체크 및 firstName, lastName 빈문자열 체크
     if (!profile || !profile.language) {
