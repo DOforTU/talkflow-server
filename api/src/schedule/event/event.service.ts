@@ -182,25 +182,23 @@ export class EventService {
     recurringEventId: number,
     locationId?: number,
   ): Promise<Event[]> {
-    const startDate = new Date(recurring.startDate);
-    const endDate = recurring.endDate ? new Date(recurring.endDate) : undefined;
     const originalStart = eventData.startTime; // 이미 문자열
     const originalEnd = eventData.endTime; // 이미 문자열
 
-    // 반복 날짜들 생성
-    const recurringDates: Date[] = this.generateRecurringDates(
+    // 반복 날짜들 생성 (문자열 기반), 언제부터 언제까지가 아니라 "언제부터 언제까지의 반복 주기별 날짜들"
+    const recurringDateStrings: string[] = this.generateRecurringDateStrings(
       recurring.rule,
-      startDate,
-      endDate,
+      recurring.startDate,
+      recurring.endDate,
     );
 
     // 각 날짜별 이벤트 생성
     const events: Event[] = [];
-    for (const recurringDate of recurringDates) {
+    for (const recurringDateStr of recurringDateStrings) {
       const { newStart, newEnd } = this.calculateEventTimes(
         originalStart,
         originalEnd,
-        recurringDate,
+        recurringDateStr,
       );
 
       const event: Event = await this.eventRepository.createEventByTransaction(
@@ -220,37 +218,41 @@ export class EventService {
   }
 
   /**
-   * RRULE에서 반복 날짜들을 생성
+   * RRULE에서 반복 날짜들을 생성 (문자열 기반)
    * @param rruleString RRULE 문자열
-   * @param startDate 시작 날짜
-   * @param endDate 종료 날짜 (없으면 6개월 후)
-   * @returns 반복 날짜 배열
+   * @param startDateStr 시작 날짜 "2025-01-25"
+   * @param endDateStr 종료 날짜 "2026-01-25" (없으면 6개월 후)
+   * @returns 반복 날짜 문자열 배열
    */
-  private generateRecurringDates(
+  private generateRecurringDateStrings(
     rruleString: string,
-    startDate: Date,
-    endDate?: Date,
-  ): Date[] {
+    startDateStr: string,
+    endDateStr?: string,
+  ): string[] {
     try {
-      // endDate가 없으면 6개월 후까지 생성
-      const defaultEndDate =
-        endDate || new Date(startDate.getTime() + 6 * 30 * 24 * 60 * 60 * 1000);
+      // 문자열을 직접 DTSTART로 사용 (시간대 변환 없음)
+      const dtstart = startDateStr.replace(/-/g, '') + 'T000000'; // "20250125T000000"
 
-      const rule = RRule.fromString(
-        `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${rruleString}`,
-      );
+      const rule = RRule.fromString(`DTSTART:${dtstart}\nRRULE:${rruleString}`);
 
-      // between 대신 all을 사용하되 UNTIL로 제한하거나, after로 시작일 포함
-      if (endDate) {
-        // 종료일이 있으면 해당 범위에서 생성 (시작일 포함)
-        return rule.all((date, i) => date <= defaultEndDate);
-      } else {
-        // 종료일이 없으면 최대 100개까지만 생성 (무한 생성 방지)
-        return rule.all((date, i) => i < 100 && date <= defaultEndDate);
-      }
+      // 종료 날짜 설정 (주기별 차등 적용)
+      const endDate = endDateStr
+        ? new Date(endDateStr)
+        : this.calculateDefaultEndDate(rruleString, startDateStr);
+
+      // RRule에서 날짜들을 생성하고 문자열로 변환
+      return rule
+        .all((date, i) => date <= endDate && i < 100)
+        .map((date) => {
+          // Date를 로컬 날짜 문자열로 변환 (시간대 변환 없음)
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        });
     } catch (error) {
       console.error('Error parsing RRULE:', error);
-      return [startDate]; // 파싱 실패시 원래 날짜만 반환
+      return [startDateStr]; // 파싱 실패시 원래 날짜만 반환
     }
   }
 
@@ -258,25 +260,40 @@ export class EventService {
    * 개별 이벤트의 시작/종료 시간 계산 (문자열 형태)
    * @param originalStart 원래 시작 시간 "2025-09-01 19:30"
    * @param originalEnd 원래 종료 시간 "2025-09-01 21:00"
-   * @param newDate 새로운 날짜 (RRULE에서 생성된 Date)
+   * @param newDateStr 새로운 날짜 문자열 "2025-09-15"
    * @returns 새로운 시작/종료 시간 문자열
    */
   private calculateEventTimes(
     originalStart: string,
     originalEnd: string,
-    newDate: Date,
+    newDateStr: string,
   ) {
     // 원본 시간 부분 추출 ("19:30", "21:00")
     const startTimePart = originalStart.split(' ')[1]; // "19:30"
     const endTimePart = originalEnd.split(' ')[1]; // "21:00"
 
-    // 새로운 날짜를 YYYY-MM-DD 형식으로 변환
-    const newDateStr = newDate.toISOString().split('T')[0]; // "2025-09-15"
-
-    // 새로운 날짜 + 기존 시간 조합
+    // 새로운 날짜 + 기존 시간 조합 (시간대 변환 없음)
     const newStart = `${newDateStr} ${startTimePart}`;
     const newEnd = `${newDateStr} ${endTimePart}`;
 
     return { newStart, newEnd };
+  }
+
+  /**
+   * 반복 주기에 따라 기본 종료일 계산
+   * @param rruleString RRULE 문자열
+   * @param startDateStr 시작 날짜
+   * @returns 기본 종료일
+   */
+  private calculateDefaultEndDate(rruleString: string, startDateStr: string): Date {
+    const startDate = new Date(startDateStr);
+    
+    // YEARLY인 경우 5년 후 (5번 실행되도록)
+    if (rruleString.includes('YEARLY')) {
+      return new Date(startDate.getFullYear() + 5, startDate.getMonth(), startDate.getDate());
+    }
+    
+    // 그 외의 경우 1년 후
+    return new Date(startDate.getTime() + 12 * 30 * 24 * 60 * 60 * 1000);
   }
 }
