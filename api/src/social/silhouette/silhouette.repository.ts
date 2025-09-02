@@ -29,9 +29,13 @@ export class SilhouetteRepository {
 
   // ----- UPDATE -----
 
-  async updateIsPublic(id: number, isPublic: boolean): Promise<Silhouette> {
+  async updateIsPublic(
+    id: number,
+    profileId: number,
+    isPublic: boolean,
+  ): Promise<Silhouette> {
     return await this.prisma.silhouette.update({
-      where: { id },
+      where: { id, profileId },
       data: { isPublic },
     });
   }

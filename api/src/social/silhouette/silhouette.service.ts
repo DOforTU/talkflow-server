@@ -54,14 +54,17 @@ export class SilhouetteService {
   // isPublic 업데이트 -> silhouetteId로 실루엣 찾기 -> 있으면 공개로 할지 비공개로 할지 업데이트
   async updateIsPublic(
     silhouetteId: number,
+    userId: number,
     isPublic: boolean,
   ): Promise<Silhouette> {
     const silhouette = await this.silhouetteRepository.findById(silhouetteId);
     if (!silhouette) {
       throw new NotFoundException('Silhouette not found for user');
     }
+    const profile = await this.profileService.getProfileByUserId(userId);
     return await this.silhouetteRepository.updateIsPublic(
       silhouetteId,
+      profile.id,
       isPublic,
     );
   }

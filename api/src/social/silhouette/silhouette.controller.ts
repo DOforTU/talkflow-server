@@ -39,9 +39,14 @@ export class SilhouetteController {
   @UseGuards(OnBoardingGuard)
   async updateIsPublic(
     @Param('id') id: number,
+    @Request() req: { user: User },
     @Body('isPublic') isPublic: boolean,
   ): Promise<Silhouette> {
-    return await this.silhouetteService.updateIsPublic(id, isPublic);
+    return await this.silhouetteService.updateIsPublic(
+      id,
+      req.user.id,
+      isPublic,
+    );
   }
 
   // ----- DELETE -----
