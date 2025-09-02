@@ -171,7 +171,7 @@ export class AuthService {
   async refreshAccessToken(refreshToken: string): Promise<{
     success: boolean;
     accessToken?: string;
-    user?: User;
+    user?: UserWithProfile;
     message?: string;
   }> {
     try {
@@ -219,7 +219,7 @@ export class AuthService {
   }
 
   /** Generate access token */
-  generateAccessToken(user: User): string {
+  generateAccessToken(user: UserWithProfile): string {
     return this.jwtService.sign(
       {
         sub: user.id,
@@ -288,7 +288,7 @@ export class AuthService {
   }
 
   // ===== Sub Funcions ====
-  async findUserBySub(sub: number): Promise<User | null> {
+  async findUserBySub(sub: number): Promise<UserWithProfile | null> {
     return this.authRepository.findUserBySub(sub);
   }
 }

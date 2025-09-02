@@ -69,11 +69,39 @@ export class AuthRepository {
     });
   }
 
-  async findUserBySub(sub: number): Promise<User | null> {
+  async findUserBySub(sub: number): Promise<UserWithProfile | null> {
     return await this.prisma.user.findFirst({
       where: {
         id: sub,
         deletedAt: null,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        oauthId: true,
+        role: true,
+        provider: true,
+        version: true,
+
+        // timestamps
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+        lastLogin: true,
+
+        // relations
+        profile: {
+          select: {
+            id: true,
+            nickname: true,
+            avatarUrl: true,
+            language: true,
+            bio: true,
+            version: true,
+          },
+        },
       },
     });
   }
