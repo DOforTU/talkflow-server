@@ -61,16 +61,16 @@ export class SilhouetteController {
    * @param offset
    * @returns
    */
-  //@Get('like')
-  //async findPublicSilhouettesOrderByLike(
-  //  @Query('limit') limit?: number,
-  //  @Query('offset') offset?: number,
-  //): Promise<ResponseSilhouette[]> {
-  //  return await this.silhouetteService.findPublicSilhouettesOrderByLike(
-  //    limit ? Number(limit) : 20,
-  //    offset ? Number(offset) : 0,
-  //  );
-  //}
+  @Get('like')
+  async findPublicSilhouettesOrderByLike(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ): Promise<ResponseSilhouette[]> {
+    return await this.silhouetteService.findPubicSilhouetteOrederByLike(
+      limit ? Number(limit) : 20,
+      offset ? Number(offset) : 0,
+    );
+  }
 
   // ----- UPDATE -----
 

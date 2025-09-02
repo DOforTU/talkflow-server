@@ -19,9 +19,8 @@ export class CreateSilhouettesDto {
   @IsString()
   contentUrl: string;
 
-  @IsOptional()
   @IsBoolean()
-  isPublic?: boolean;
+  isPublic: boolean;
 
   //@IsOptional()
   //runningTime?: number;
