@@ -27,7 +27,6 @@ export class OnBoardingGuard extends JwtAuthGuard {
     if (!user) throw new UnauthorizedException('User not found in request');
 
     const profile = user.profile;
-    console.log('OnBoardingGuard - user profile:', profile);
 
     // language null 체크 및 firstName, lastName 빈문자열 체크
     if (!profile || !profile.language) {
