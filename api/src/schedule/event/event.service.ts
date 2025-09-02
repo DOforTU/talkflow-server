@@ -100,6 +100,7 @@ export class EventService {
    * @returns
    */
   async deleteSingleEvent(userId: number, eventId: number): Promise<Event> {
+    await this.getEventByIdAndUserId(eventId, userId); // 존재 여부 확인
     return await this.eventRepository.deleteSingleEvent(userId, eventId);
   }
 
