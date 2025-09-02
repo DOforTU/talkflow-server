@@ -80,7 +80,7 @@ export interface EventData {
 }
 
 // ===== 서버가 클라이언트에게 응답하는 정보 DTO =====
-export class ResponseEventDto {
+export class EventDetailDto {
   id: number;
   title: string;
   description: string | null;

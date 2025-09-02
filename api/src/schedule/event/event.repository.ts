@@ -1,7 +1,7 @@
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Event, Prisma } from '@prisma/client';
-import { EventData, ResponseEventDto } from './event.dto';
+import { EventData, EventDetailDto } from './event.dto';
 
 @Injectable()
 export class EventRepository {
@@ -53,7 +53,7 @@ export class EventRepository {
 
   // ===== READ =====
 
-  async findEventsByUserId(userId: number): Promise<ResponseEventDto[]> {
+  async findEventsByUserId(userId: number): Promise<EventDetailDto[]> {
     return await this.prismaService.event.findMany({
       where: { userId, deletedAt: null },
       select: {
@@ -109,11 +109,24 @@ export class EventRepository {
     });
   }
 
+  async findByIdAndUserId(
+    eventId: number,
+    userId: number,
+  ): Promise<Event | null> {
+    return await this.prismaService.event.findFirst({
+      where: {
+        id: eventId,
+        userId: userId,
+        deletedAt: null,
+      },
+    });
+  }
+
   // ===== DELETE =====
 
-  async deleteSingleEvent(userId: number, eventId: number): Promise<void> {
+  async deleteSingleEvent(userId: number, eventId: number): Promise<Event> {
     // Soft delete a single event (verify ownership)
-    await this.prismaService.event.update({
+    return await this.prismaService.event.update({
       where: {
         id: eventId,
         userId: userId,
@@ -125,27 +138,13 @@ export class EventRepository {
     });
   }
 
-  async deleteRecurringEvents(userId: number, eventId: number): Promise<void> {
-    // First, find the event to get the recurringEventId
-    const event = await this.prismaService.event.findFirst({
-      where: {
-        id: eventId,
-        userId: userId,
-        deletedAt: null,
-      },
-      select: {
-        recurringEventId: true,
-      },
-    });
-
-    if (!event?.recurringEventId) {
-      throw new Error('Event is not part of a recurring series');
-    }
-
-    // Soft delete all events in the recurring series
+  async deleteRecurringEvents(
+    userId: number,
+    recurringEventId: number,
+  ): Promise<void> {
     await this.prismaService.event.updateMany({
       where: {
-        recurringEventId: event.recurringEventId,
+        recurringEventId: recurringEventId,
         userId: userId,
         deletedAt: null,
       },
@@ -154,10 +153,9 @@ export class EventRepository {
       },
     });
 
-    // Also soft delete the recurring event metadata
     await this.prismaService.recurringEvent.updateMany({
       where: {
-        id: event.recurringEventId,
+        id: recurringEventId,
         userId: userId,
         deletedAt: null,
       },

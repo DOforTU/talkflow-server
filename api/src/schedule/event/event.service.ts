@@ -1,6 +1,10 @@
 import { EventRepository } from './event.repository';
-import { Injectable } from '@nestjs/common';
-import { CreateEventDto, EventData, ResponseEventDto } from './event.dto';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { CreateEventDto, EventData, EventDetailDto } from './event.dto';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LocationService } from '../location/location.service';
 import { RecurringEventService } from '../recurring-event/recurring-event.service';
@@ -76,17 +80,44 @@ export class EventService {
   }
 
   // ===== READ =====
-  async getMyEvents(userId: number): Promise<ResponseEventDto[]> {
+  async getMyEvents(userId: number): Promise<EventDetailDto[]> {
     return await this.eventRepository.findEventsByUserId(userId);
   }
 
+  async getEventByIdAndUserId(eventId: number, userId: number): Promise<Event> {
+    const event = await this.eventRepository.findByIdAndUserId(eventId, userId);
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    return event;
+  }
+
   // ===== DELETE =====
-  async deleteSingleEvent(userId: number, eventId: number): Promise<void> {
+  /**
+   * 단일 이벤트 삭제
+   * @param userId
+   * @param eventId
+   * @returns
+   */
+  async deleteSingleEvent(userId: number, eventId: number): Promise<Event> {
     return await this.eventRepository.deleteSingleEvent(userId, eventId);
   }
 
+  /**
+   * 반복 이벤트 삭제 및 관련된 일정 모두 삭제
+   * @param userId
+   * @param eventId
+   * @returns
+   */
   async deleteRecurringEvents(userId: number, eventId: number): Promise<void> {
-    return await this.eventRepository.deleteRecurringEvents(userId, eventId);
+    const event = await this.getEventByIdAndUserId(eventId, userId);
+    if (!event.recurringEventId) {
+      throw new BadRequestException('Event is not part of a recurring series');
+    }
+    return await this.eventRepository.deleteRecurringEvents(
+      userId,
+      event.recurringEventId,
+    );
   }
 
   // ===== Sub Functions =====

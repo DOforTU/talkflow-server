@@ -11,13 +11,15 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { EventService } from './event.service';
-import { CreateEventDto, ResponseEventDto } from './event.dto';
-import { JwtAuthGuard } from 'src/account/auth/jwt';
+import { CreateEventDto, EventDetailDto } from './event.dto';
+import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 
 @Controller('events')
-@UseGuards(JwtAuthGuard)
+@UseGuards(OnBoardingGuard)
 export class EventController {
   constructor(private readonly eventService: EventService) {}
+
+  // ===== CREATE =====
 
   @Post()
   async createEvent(
@@ -35,21 +37,35 @@ export class EventController {
     );
   }
 
+  // ===== READ =====
+
   @Get()
-  async getMyEvents(
-    @Request() req: { user: User },
-  ): Promise<ResponseEventDto[]> {
+  async getMyEvents(@Request() req: { user: User }): Promise<EventDetailDto[]> {
     return await this.eventService.getMyEvents(req.user.id);
   }
 
+  // ===== DELETE =====
+
+  /**
+   * 단일 이벤트 삭제
+   * @param req
+   * @param eventId
+   * @returns
+   */
   @Delete(':id')
   async deleteSingleEvent(
     @Request() req: { user: User },
     @Param('id', ParseIntPipe) eventId: number,
-  ): Promise<void> {
+  ): Promise<Event> {
     return await this.eventService.deleteSingleEvent(req.user.id, eventId);
   }
 
+  /**
+   * 반복 이벤트 삭제 및 관련된 일정 모두 삭제
+   * @param req
+   * @param eventId
+   * @returns
+   */
   @Delete(':id/recurring/all')
   async deleteRecurringEvents(
     @Request() req: { user: User },
