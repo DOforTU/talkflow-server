@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { UserRepository } from './user.repository';
-import { UpdateUserDto } from './user.dto';
+import { ResponseUserDto, UpdateUserDto } from './user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   // ===== READ =====
-  async getUserById(id: number): Promise<User> {
+  async getUserById(id: number): Promise<ResponseUserDto> {
     const user = await this.findUserById(id);
 
     if (!user) {
@@ -19,7 +19,10 @@ export class UserService {
   }
 
   // ===== UPDATE =====
-  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateUser(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<ResponseUserDto> {
     await this.getUserById(id);
     const updatedUser = await this.userRepository.updateUser(id, updateUserDto);
     if (!updatedUser) {
@@ -30,7 +33,7 @@ export class UserService {
 
   // ===== Sub Functions =====
 
-  async findUserById(id: number): Promise<User | null> {
+  async findUserById(id: number): Promise<ResponseUserDto | null> {
     return await this.userRepository.findById(id);
   }
 }
