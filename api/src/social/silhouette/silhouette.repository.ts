@@ -58,12 +58,7 @@ export class SilhouetteRepository {
     if (silhouetteIds.length === 0) {
       return [];
     }
-
-    // 해당 ID의 실루엣들을 조회
-    return await this.prisma.silhouette.findMany({
-      where: { id: { in: silhouetteIds.map((s) => s.id) } },
-      orderBy: { createdAt: 'desc' },
-    });
+    return silhouetteIds;
   }
 
   // ----- UPDATE -----

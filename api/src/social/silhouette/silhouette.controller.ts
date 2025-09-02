@@ -56,19 +56,22 @@ export class SilhouetteController {
 
   /**
    * 좋아요가 많은 순으로 인기순 silhouette을 보여줄 예정
+   * silhouette-like에서 해당 게시글 좋아요수를 파악하고 많은 순으로 반환 일자는 30일 이내로
    * @param limit
    * @param offset
    * @returns
    */
-  async findPublicSilhouettesOrderByLike(
-    limit?: number,
-    offset?: number,
-  ): Promise<ResponseSilhouette[]> {
-    return await this.silhouetteService.findPublicSilhouettesOrderByLike(
-      limit ? Number(limit) : 20,
-      offset ? Number(offset) : 0,
-    );
-  }
+  //@Get('like')
+  //async findPublicSilhouettesOrderByLike(
+  //  @Query('limit') limit?: number,
+  //  @Query('offset') offset?: number,
+  //): Promise<ResponseSilhouette[]> {
+  //  return await this.silhouetteService.findPublicSilhouettesOrderByLike(
+  //    limit ? Number(limit) : 20,
+  //    offset ? Number(offset) : 0,
+  //  );
+  //}
+
   // ----- UPDATE -----
 
   @Patch('update/:id')

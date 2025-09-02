@@ -59,6 +59,11 @@ export class SilhouetteService {
     );
   }
 
+  async findPubicSilhouetteOrederByLike(
+    limit: number = 20,
+    offset: number = 0,
+  ) {}
+
   // ----- UPDATE -----
 
   // isPublic 업데이트 -> silhouetteId로 실루엣 찾기 -> 있으면 공개로 할지 비공개로 할지 업데이트

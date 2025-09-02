@@ -9,7 +9,7 @@ model Silhouette {
 
   // Silhouette Information
   contentUrl  String    @db.VarChar
-  type        content_enum?
+  type        content_enum
   runningTime Float  @db.DoublePrecision() @default(15.0)
   isPublic    Boolean  @default(false)
 
