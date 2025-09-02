@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -33,6 +35,40 @@ export class SilhouetteController {
     );
   }
 
+  // ----- READ -----
+
+  /**
+   *
+   * @param limit 한번에 게시글을 몇개 불러오고 보여줄것인지 20개가 최대 스크롤하여 20개 요청한거 보여주고 20번째 다시 20개 호출
+   * @param offset 값이 0이기에 건너뜀없이 하나씩 차례대로 보여줌
+   * @returns 최근 silhouette 20개를 최신순으로 보여줌
+   */
+  @Get()
+  async findPublicSilhouettesOrderByLatest(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ): Promise<Silhouette[]> {
+    return await this.silhouetteService.findPublicSilhouettesOrderByLatest(
+      limit ? Number(limit) : 20,
+      offset ? Number(offset) : 0,
+    );
+  }
+
+  /**
+   * 좋아요가 많은 순으로 인기순 silhouette을 보여줄 예정
+   * @param limit
+   * @param offset
+   * @returns
+   */
+  async findPublicSilhouettesOrderByLike(
+    limit?: number,
+    offset?: number,
+  ): Promise<Silhouette[]> {
+    return await this.silhouetteService.findPublicSilhouettesOrderByLike(
+      limit ? Number(limit) : 20,
+      offset ? Number(offset) : 0,
+    );
+  }
   // ----- UPDATE -----
 
   @Patch('update/:id')

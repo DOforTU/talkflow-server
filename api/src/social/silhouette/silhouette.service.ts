@@ -49,6 +49,16 @@ export class SilhouetteService {
     throw new BadRequestException('Invalid content URL');
   }
 
+  async findPublicSilhouettesOrderByLatest(
+    limit: number = 20,
+    offset: number = 0,
+  ): Promise<Silhouette[]> {
+    return await this.silhouetteRepository.findPublicSilhouettesOrderByLatest(
+      limit,
+      offset,
+    );
+  }
+
   // ----- UPDATE -----
 
   // isPublic 업데이트 -> silhouetteId로 실루엣 찾기 -> 있으면 공개로 할지 비공개로 할지 업데이트
