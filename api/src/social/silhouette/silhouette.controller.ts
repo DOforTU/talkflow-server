@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { SilhouetteService } from './silhouette.service';
 import { Silhouette, User } from '@prisma/client';
-import { CreateSilhouettesDto } from './silhoutette.dto';
+import { CreateSilhouettesDto, ResponseSilhouette } from './silhoutette.dto';
 import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 
 @Controller('silhouette')
@@ -47,7 +47,7 @@ export class SilhouetteController {
   async findPublicSilhouettesOrderByLatest(
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
-  ): Promise<Silhouette[]> {
+  ): Promise<ResponseSilhouette[]> {
     return await this.silhouetteService.findPublicSilhouettesOrderByLatest(
       limit ? Number(limit) : 20,
       offset ? Number(offset) : 0,
@@ -63,7 +63,7 @@ export class SilhouetteController {
   async findPublicSilhouettesOrderByLike(
     limit?: number,
     offset?: number,
-  ): Promise<Silhouette[]> {
+  ): Promise<ResponseSilhouette[]> {
     return await this.silhouetteService.findPublicSilhouettesOrderByLike(
       limit ? Number(limit) : 20,
       offset ? Number(offset) : 0,

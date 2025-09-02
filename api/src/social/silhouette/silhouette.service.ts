@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateSilhouettesDto } from './silhoutette.dto';
+import { CreateSilhouettesDto, ResponseSilhouette } from './silhoutette.dto';
 import { SilhouetteRepository } from './silhouette.repository';
 import { content_enum, Silhouette } from '@prisma/client';
 import { ProfileService } from 'src/account/profile/profile.service';
@@ -52,7 +52,7 @@ export class SilhouetteService {
   async findPublicSilhouettesOrderByLatest(
     limit: number = 20,
     offset: number = 0,
-  ): Promise<Silhouette[]> {
+  ): Promise<ResponseSilhouette[]> {
     return await this.silhouetteRepository.findPublicSilhouettesOrderByLatest(
       limit,
       offset,

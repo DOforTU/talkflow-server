@@ -1,5 +1,19 @@
+import { content_enum } from '@prisma/client';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
-import e from 'express';
+
+export class ResponseSilhouette {
+  id: number;
+  contentUrl: string;
+  type: content_enum;
+  runningTime: number;
+  isPublic: boolean;
+  createdAt: Date;
+  profile: {
+    id: number;
+    nickname: string;
+    avatarUrl: string;
+  };
+}
 
 export class CreateSilhouettesDto {
   @IsString()

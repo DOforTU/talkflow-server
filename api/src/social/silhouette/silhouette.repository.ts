@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { content_enum, Silhouette } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { CreateSilhouettesDto } from './silhoutette.dto';
+import { CreateSilhouettesDto, ResponseSilhouette } from './silhoutette.dto';
 
 @Injectable()
 export class SilhouetteRepository {
@@ -30,14 +30,29 @@ export class SilhouetteRepository {
   async findPublicSilhouettesOrderByLatest(
     limit: number = 20,
     offset: number = 0,
-  ): Promise<Silhouette[]> {
+  ): Promise<ResponseSilhouette[]> {
     // 먼저 실루엣 ID만 가져오기
     const silhouetteIds = await this.prisma.silhouette.findMany({
+      // TODO: 오늘 기준 createdAt 30일 이내
       where: { isPublic: true, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip: offset,
-      select: { id: true },
+      select: {
+        id: true,
+        contentUrl: true,
+        type: true,
+        runningTime: true,
+        isPublic: true,
+        createdAt: true,
+        profile: {
+          select: {
+            id: true,
+            nickname: true,
+            avatarUrl: true,
+          },
+        },
+      },
     });
 
     if (silhouetteIds.length === 0) {
