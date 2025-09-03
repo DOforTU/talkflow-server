@@ -1,6 +1,5 @@
 import {
   IsString,
-  IsDateString,
   IsOptional,
   IsBoolean,
   IsHexColor,
@@ -15,6 +14,7 @@ import {
 import {
   CreateRecurringRuleDto,
   ResponseRecurringDto,
+  UpdateRecurringEventDto,
 } from '../recurring-event/recurring-event.dto';
 
 // ===== 클라이언트에서 서버로 POST api/event 요청 시 사용되는 DTO =====
@@ -67,6 +67,48 @@ export class CreateEventDto {
   @ValidateNested()
   @Type(() => CreateRecurringRuleDto)
   recurring?: CreateRecurringRuleDto;
+}
+
+export class UpdateEventDto {
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, {
+    message: 'startTime must be in format YYYY-MM-DD HH:mm',
+  })
+  startTime?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, {
+    message: 'endTime must be in format YYYY-MM-DD HH:mm',
+  })
+  endTime?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isAllDay?: boolean;
+
+  @IsOptional()
+  @IsHexColor()
+  colorCode?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateLocationDto)
+  location?: CreateLocationDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UpdateRecurringEventDto)
+  recurring?: UpdateRecurringEventDto;
 }
 
 // ===== 서버 내부에서 사용되는 데이터 타입 정의 =====

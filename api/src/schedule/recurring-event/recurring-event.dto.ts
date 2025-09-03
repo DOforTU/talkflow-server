@@ -21,6 +21,20 @@ export class CreateRecurringRuleDto {
   endDate?: string;
 }
 
+export class UpdateRecurringEventDto {
+  @IsOptional()
+  @IsString()
+  rule?: string;
+
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+}
+
 // ===== 서버 내부에서 사용되는 데이터 타입 정의 =====
 
 // 반복 규칙 타입 정의
