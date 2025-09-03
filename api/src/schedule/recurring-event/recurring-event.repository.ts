@@ -32,6 +32,19 @@ export class RecurringEventRepository {
         userId,
         deletedAt: null,
       },
+      select: {
+        id: true,
+        userId: true,
+        rule: true,
+        startDate: true,
+        endDate: true,
+        title: true,
+        description: true,
+        colorCode: true,
+        startTime: true,
+        endTime: true,
+        version: true,
+      },
     });
   }
 }

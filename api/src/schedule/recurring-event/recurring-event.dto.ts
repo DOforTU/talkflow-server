@@ -70,4 +70,7 @@ export class ResponseRecurringEventDto {
   title: string;
   description: string | null;
   colorCode: string;
+  startTime: string;
+  endTime: string;
+  version: number;
 }
