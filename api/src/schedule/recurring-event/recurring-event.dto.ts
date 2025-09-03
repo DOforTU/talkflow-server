@@ -48,11 +48,15 @@ export interface CreateRecurringEventData {
   rule: string;
   startDate: string; // "2025-09-01" 형식
   endDate?: string; // "2025-09-30" 형식
+
+  // event 정보
   title: string;
   description?: string;
   colorCode: string;
   userId: number;
   locationId?: number;
+  startTime: string; // "2025-09-01 19:30" 형식
+  endTime: string; // "2025-09-01 21:00" 형식
 }
 
 // 서버에서 클라이언트에게 응답하는 정보 DTO

@@ -43,6 +43,8 @@ export class RecurringEventService {
         title: eventData.title,
         description: eventData.description,
         colorCode: eventData.colorCode,
+        startTime: eventData.startTime,
+        endTime: eventData.endTime,
         userId,
         locationId,
       },
