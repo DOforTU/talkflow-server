@@ -46,7 +46,7 @@ export class EventRepository {
         isAllDay: eventData.isAllDay,
         userId,
         locationId,
-        recurringEventId,
+        recurringEventId: recurringEventId === 0 ? null : recurringEventId, // 0이면 null로 설정
       },
     });
   }

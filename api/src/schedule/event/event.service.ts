@@ -110,12 +110,17 @@ export class EventService {
     eventId: number,
     updateEventDto: UpdateEventDto,
   ): Promise<Event> {
-    await this.getEventById(eventId, userId);
+    const event = await this.getEventById(eventId, userId);
     const { location, recurring, ...eventData } = updateEventDto;
 
     // 위치 업데이트 처리(location 없으면 어차피 undefined)
     const locationId =
       await this.locationService.createLocationIfNeeded(location);
+
+    // 원래 반복이 있었지만, 업데이트 DTO에 반복이 사라졌다면, 모든 반복 일정 삭제 후 현재 일정만 남김
+    if (event.recurringEventId && !updateEventDto.recurring) {
+      await this.eventRepository.deleteRecurringEvents(userId, eventId);
+    }
 
     return await this.eventRepository.updateSingleEvent(
       userId,
