@@ -120,6 +120,24 @@ export class EventService {
     );
   }
 
+  /**
+   * 현재 일정부터 이후의 모든 반복 일정 삭제
+   * @param userId
+   * @param eventId
+   * @returns
+   */
+  async deleteEventsFromThis(userId: number, eventId: number): Promise<void> {
+    const event = await this.getEventById(eventId, userId);
+    if (!event.recurringEventId) {
+      throw new BadRequestException('Event is not part of a recurring series');
+    }
+    return await this.eventRepository.deleteEventsFromThis(
+      userId,
+      event.recurringEventId,
+      event.startTime,
+    );
+  }
+
   // ===== Sub Functions =====
 
   /**

@@ -140,4 +140,24 @@ export class EventRepository {
       },
     });
   }
+
+  async deleteEventsFromThis(
+    userId: number,
+    recurringEventId: number,
+    fromStartTime: string,
+  ): Promise<void> {
+    await this.prismaService.event.updateMany({
+      where: {
+        recurringEventId: recurringEventId,
+        userId: userId,
+        startTime: {
+          gte: fromStartTime,
+        },
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  }
 }

@@ -75,4 +75,18 @@ export class EventController {
   ): Promise<void> {
     return await this.eventService.deleteRecurringEvents(req.user.id, eventId);
   }
+
+  /**
+   * 현재 일정부터 이후의 모든 반복 일정 삭제
+   * @param req
+   * @param eventId
+   * @returns
+   */
+  @Delete(':id/recurring/from-this')
+  async deleteEventsFromThis(
+    @Request() req: { user: User },
+    @Param('id', ParseIntPipe) eventId: number,
+  ): Promise<void> {
+    return await this.eventService.deleteEventsFromThis(req.user.id, eventId);
+  }
 }
