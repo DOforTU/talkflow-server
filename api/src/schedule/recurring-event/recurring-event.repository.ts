@@ -5,6 +5,7 @@ import {
   CreateRecurringEventData,
   RecurringData,
   ResponseRecurringEventDto,
+  UpdateRecurringEventDto,
 } from './recurring-event.dto';
 import { EventData } from '../event/event.dto';
 
@@ -54,8 +55,8 @@ export class RecurringEventRepository {
   }
 
   async findById(
-    userId: number,
     id: number,
+    userId: number,
   ): Promise<ResponseRecurringEventDto | null> {
     return await this.prismaService.recurringEvent.findFirst({
       where: {
@@ -75,6 +76,35 @@ export class RecurringEventRepository {
         startTime: true,
         endTime: true,
         version: true,
+      },
+    });
+  }
+
+  // ===== UPDATE =====
+
+  /**
+   * 트랜잭션 내에서 반복 이벤트 업데이트
+   */
+  async updateRecurringEventWithTransaction(
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
+    userId: number,
+    recurringEventId: number,
+    updateData: UpdateRecurringEventDto,
+  ): Promise<void> {
+    await tx.recurringEvent.update({
+      where: {
+        id: recurringEventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        ...updateData,
+        version: {
+          increment: 1,
+        },
       },
     });
   }

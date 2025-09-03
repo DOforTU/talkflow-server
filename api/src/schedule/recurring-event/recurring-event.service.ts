@@ -5,6 +5,7 @@ import {
   CreateRecurringEventData,
   RecurringData,
   ResponseRecurringEventDto,
+  UpdateRecurringEventDto,
 } from './recurring-event.dto';
 import { EventData } from '../event/event.dto';
 
@@ -61,15 +62,51 @@ export class RecurringEventService {
   // ===== READ =====
 
   async getRecurringEventById(
-    userId: number,
     id: number,
+    userId: number,
   ): Promise<ResponseRecurringEventDto> {
-    const recurring = await this.recurringEventRepository.findById(userId, id);
+    const recurring = await this.recurringEventRepository.findById(id, userId);
 
     if (!recurring) {
       throw new NotFoundException('Recurring event not found');
     }
 
     return recurring;
+  }
+
+  // ===== UPDATE =====
+
+  /**
+   * 트랜잭션 내에서 반복 이벤트 업데이트
+   */
+  async updateRecurringEventWithTransaction(
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
+    userId: number,
+    recurringEventId: number,
+    updateData: UpdateRecurringEventDto,
+  ): Promise<void> {
+    // RRULE에 UNTIL 추가 (endDate가 있는 경우)
+    let updatedRule = updateData.rule;
+    if (updateData.endDate && updatedRule && !updatedRule.includes('UNTIL=')) {
+      const endDate = new Date(updateData.endDate);
+      const untilDateStr =
+        endDate.getFullYear() +
+        String(endDate.getMonth() + 1).padStart(2, '0') +
+        String(endDate.getDate()).padStart(2, '0'); // YYYYMMDD 형식
+      updatedRule += `;UNTIL=${untilDateStr}`;
+    }
+
+    await this.recurringEventRepository.updateRecurringEventWithTransaction(
+      tx,
+      userId,
+      recurringEventId,
+      {
+        ...updateData,
+        rule: updatedRule || updateData.rule,
+      },
+    );
   }
 }

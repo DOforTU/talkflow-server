@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { RecurringEventService } from './recurring-event.service';
 import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
-import { RecurringEvent, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { ResponseRecurringEventDto } from './recurring-event.dto';
 
 @Controller('recurring-event')
@@ -22,8 +22,8 @@ export class RecurringEventController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseRecurringEventDto> {
     return await this.recurringEventService.getRecurringEventById(
-      req.user.id,
       id,
+      req.user.id,
     );
   }
 }

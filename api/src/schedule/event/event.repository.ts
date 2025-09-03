@@ -98,6 +98,49 @@ export class EventRepository {
     });
   }
 
+  // ===== UPDATE =====
+
+  async updateSingleEvent(
+    userId: number,
+    eventId: number,
+    eventData: Partial<EventData>,
+    locationId?: number,
+  ): Promise<Event> {
+    return await this.prismaService.event.update({
+      where: {
+        id: eventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        ...eventData,
+        locationId,
+        version: {
+          increment: 1,
+        },
+      },
+    });
+  }
+
+  async updateEventsByRecurringEventId(
+    userId: number,
+    recurringEventId: number,
+    eventData: Partial<EventData>,
+    locationId?: number,
+  ): Promise<void> {
+    await this.prismaService.event.updateMany({
+      where: {
+        recurringEventId: recurringEventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        ...eventData,
+        locationId,
+      },
+    });
+  }
+
   // ===== DELETE =====
 
   async deleteSingleEvent(userId: number, eventId: number): Promise<Event> {
@@ -141,13 +184,16 @@ export class EventRepository {
     });
   }
 
-  async deleteEventsFromThis(
+  async softDeleteFutureEventsByTransaction(
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
     userId: number,
     recurringEventId: number,
     fromStartTime: string,
   ): Promise<void> {
-    // 해당 날짜 이후의 이벤트들을 삭제
-    await this.prismaService.event.updateMany({
+    await tx.event.updateMany({
       where: {
         recurringEventId: recurringEventId,
         userId: userId,
@@ -160,48 +206,38 @@ export class EventRepository {
         deletedAt: new Date(),
       },
     });
+  }
 
-    // RecurringEvent의 RRULE을 업데이트하여 선택한 날짜 전까지만 반복하도록 수정
-    const recurringEvent = await this.prismaService.recurringEvent.findFirst({
+  async findRecurringEventById(
+    userId: number,
+    recurringEventId: number,
+  ): Promise<any | null> {
+    return await this.prismaService.recurringEvent.findFirst({
       where: {
         id: recurringEventId,
         userId: userId,
         deletedAt: null,
       },
     });
+  }
 
-    if (recurringEvent) {
-      // fromStartTime에서 하루 전 날짜를 계산
-      const fromDate = new Date(fromStartTime.split(' ')[0]);
-      const untilDate = new Date(fromDate);
-      untilDate.setDate(untilDate.getDate() - 1);
-      
-      // RRULE에 UNTIL 추가 (날짜만 사용, 시간대 무관)
-      const untilDateStr = untilDate.getFullYear() + 
-        String(untilDate.getMonth() + 1).padStart(2, '0') + 
-        String(untilDate.getDate()).padStart(2, '0'); // YYYYMMDD 형식
-      
-      let updatedRule = recurringEvent.rule;
-      if (updatedRule.includes('UNTIL=')) {
-        // 기존 UNTIL을 새로운 날짜로 교체
-        updatedRule = updatedRule.replace(/UNTIL=\d{8}(T\d{6}Z?)?/, `UNTIL=${untilDateStr}`);
-      } else {
-        // UNTIL 추가 (날짜만, 시간 없음)
-        updatedRule += `;UNTIL=${untilDateStr}`;
-      }
-
-      // endDate를 선택한 날짜의 전날로 설정
-      const endDateStr = untilDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
-
-      await this.prismaService.recurringEvent.update({
-        where: {
-          id: recurringEventId,
-        },
-        data: {
-          rule: updatedRule,
-          endDate: endDateStr,
-        },
-      });
-    }
+  async updateRecurringEventRuleByTransaction(
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
+    recurringEventId: number,
+    updatedRule: string,
+    endDateStr: string,
+  ): Promise<void> {
+    await tx.recurringEvent.update({
+      where: {
+        id: recurringEventId,
+      },
+      data: {
+        rule: updatedRule,
+        endDate: endDateStr,
+      },
+    });
   }
 }

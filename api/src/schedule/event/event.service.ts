@@ -4,7 +4,12 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { CreateEventDto, EventData, ResponseEventDto } from './event.dto';
+import {
+  CreateEventDto,
+  EventData,
+  ResponseEventDto,
+  UpdateEventDto,
+} from './event.dto';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LocationService } from '../location/location.service';
 import { RecurringEventService } from '../recurring-event/recurring-event.service';
@@ -91,6 +96,79 @@ export class EventService {
     return event;
   }
 
+  // ===== UPDATE =====
+
+  /**
+   * 단일 이벤트 업데이트
+   * @param userId
+   * @param eventId
+   * @param updateEventDto
+   * @returns
+   */
+  async updateSingleEvent(
+    userId: number,
+    eventId: number,
+    updateEventDto: UpdateEventDto,
+  ): Promise<Event> {
+    await this.getEventById(eventId, userId);
+    const { location, recurring, ...eventData } = updateEventDto;
+
+    // 위치 업데이트 처리(location 없으면 어차피 undefined)
+    const locationId =
+      await this.locationService.createLocationIfNeeded(location);
+
+    return await this.eventRepository.updateSingleEvent(
+      userId,
+      eventId,
+      eventData,
+      locationId,
+    );
+  }
+
+  /**
+   * 반복 이벤트 전체 업데이트
+   * @param userId
+   * @param eventId
+   * @param updateEventDto
+   * @returns
+   */
+  async updateRecurringEvents(
+    userId: number,
+    eventId: number,
+    updateEventDto: UpdateEventDto,
+  ): Promise<void> {
+    const event = await this.getEventById(eventId, userId);
+    if (!event.recurringEventId) {
+      throw new BadRequestException('Event is not part of a recurring series');
+    }
+
+    const { location, recurring, ...eventData } = updateEventDto;
+
+    // 위치 업데이트 처리(location 없으면 어차피 undefined)
+    const locationId =
+      await this.locationService.createLocationIfNeeded(location);
+
+    return await this.prismaService.$transaction(async (tx) => {
+      // 모든 반복 이벤트 업데이트
+      await this.eventRepository.updateEventsByRecurringEventId(
+        userId,
+        event.recurringEventId!,
+        eventData,
+        locationId,
+      );
+
+      // RecurringEvent 업데이트 (필요한 경우)
+      if (recurring) {
+        await this.recurringEventService.updateRecurringEventWithTransaction(
+          tx,
+          userId,
+          event.recurringEventId!,
+          recurring,
+        );
+      }
+    });
+  }
+
   // ===== DELETE =====
   /**
    * 단일 이벤트 삭제
@@ -131,11 +209,41 @@ export class EventService {
     if (!event.recurringEventId) {
       throw new BadRequestException('Event is not part of a recurring series');
     }
-    return await this.eventRepository.deleteEventsFromThis(
-      userId,
-      event.recurringEventId,
+
+    // 1. RecurringEvent 조회
+    const recurringEvent =
+      await this.recurringEventService.getRecurringEventById(
+        userId,
+        event.recurringEventId,
+      );
+
+    // 2. 새로운 종료 날짜 계산
+    const { untilDateStr, endDateStr } = this.calculateNewEndDate(
       event.startTime,
     );
+    const updatedRule = this.updateRRuleWithUntil(
+      recurringEvent.rule,
+      untilDateStr,
+    );
+
+    // 3. 트랜잭션으로 실행
+    return await this.prismaService.$transaction(async (tx) => {
+      // 미래 이벤트들 소프트 삭제
+      await this.eventRepository.softDeleteFutureEventsByTransaction(
+        tx,
+        userId,
+        event.recurringEventId!,
+        event.startTime,
+      );
+
+      // RecurringEvent 업데이트
+      await this.eventRepository.updateRecurringEventRuleByTransaction(
+        tx,
+        event.recurringEventId!,
+        updatedRule,
+        endDateStr,
+      );
+    });
   }
 
   // ===== Sub Functions =====
@@ -184,6 +292,8 @@ export class EventService {
 
     return events;
   }
+
+  // ===== Sub Functions =====
 
   /**
    * 이벤트 인스턴스들 생성
@@ -292,5 +402,53 @@ export class EventService {
     const newEnd = `${newDateStr} ${endTimePart}`;
 
     return { newStart, newEnd };
+  }
+
+  /**
+   * 새로운 종료 날짜 계산
+   * @param fromStartTime 시작 시간
+   * @returns untilDateStr과 endDateStr
+   */
+  private calculateNewEndDate(fromStartTime: string): {
+    untilDateStr: string;
+    endDateStr: string;
+  } {
+    // fromStartTime에서 하루 전 날짜를 계산
+    const fromDate = new Date(fromStartTime.split(' ')[0]);
+    const untilDate = new Date(fromDate);
+    untilDate.setDate(untilDate.getDate() - 1);
+
+    // RRULE에 UNTIL 추가 (날짜만 사용, 시간대 무관)
+    const untilDateStr =
+      untilDate.getFullYear() +
+      String(untilDate.getMonth() + 1).padStart(2, '0') +
+      String(untilDate.getDate()).padStart(2, '0'); // YYYYMMDD 형식
+
+    // endDate를 선택한 날짜의 전날로 설정
+    const endDateStr = untilDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+
+    return { untilDateStr, endDateStr };
+  }
+
+  /**
+   * RRULE에 UNTIL 날짜 추가/업데이트
+   * @param currentRule 현재 RRULE
+   * @param untilDateStr UNTIL 날짜 문자열
+   * @returns 업데이트된 RRULE
+   */
+  private updateRRuleWithUntil(
+    currentRule: string,
+    untilDateStr: string,
+  ): string {
+    if (currentRule.includes('UNTIL=')) {
+      // 기존 UNTIL을 새로운 날짜로 교체
+      return currentRule.replace(
+        /UNTIL=\d{8}(T\d{6}Z?)?/,
+        `UNTIL=${untilDateStr}`,
+      );
+    } else {
+      // UNTIL 추가 (날짜만, 시간 없음)
+      return currentRule + `;UNTIL=${untilDateStr}`;
+    }
   }
 }
