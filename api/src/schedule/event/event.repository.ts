@@ -1,7 +1,7 @@
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Event, Prisma } from '@prisma/client';
-import { EventData, EventDetailDto } from './event.dto';
+import { EventData, ResponseEventDto } from './event.dto';
 
 @Injectable()
 export class EventRepository {
@@ -53,7 +53,7 @@ export class EventRepository {
 
   // ===== READ =====
 
-  async findEventsByUserId(userId: number): Promise<EventDetailDto[]> {
+  async findEventsByUserId(userId: number): Promise<ResponseEventDto[]> {
     return await this.prismaService.event.findMany({
       where: { userId, deletedAt: null },
       select: {
@@ -73,6 +73,7 @@ export class EventRepository {
 
         // parts of relations
         userId: true,
+        recurringEventId: true,
         location: {
           select: {
             id: true,
@@ -83,36 +84,11 @@ export class EventRepository {
             longitude: true,
           },
         },
-        recurringEvent: {
-          select: {
-            id: true,
-            rule: true,
-            startDate: true,
-            endDate: true,
-            title: true,
-            description: true,
-            colorCode: true,
-            version: true,
-            location: {
-              select: {
-                id: true,
-                nameKo: true,
-                nameEn: true,
-                address: true,
-                latitude: true,
-                longitude: true,
-              },
-            },
-          },
-        },
       },
     });
   }
 
-  async findByIdAndUserId(
-    eventId: number,
-    userId: number,
-  ): Promise<Event | null> {
+  async findById(eventId: number, userId: number): Promise<Event | null> {
     return await this.prismaService.event.findFirst({
       where: {
         id: eventId,

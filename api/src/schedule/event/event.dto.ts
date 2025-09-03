@@ -13,7 +13,6 @@ import {
 } from '../location/location.dto';
 import {
   CreateRecurringRuleDto,
-  ResponseRecurringDto,
   UpdateRecurringEventDto,
 } from '../recurring-event/recurring-event.dto';
 
@@ -122,7 +121,7 @@ export interface EventData {
 }
 
 // ===== 서버가 클라이언트에게 응답하는 정보 DTO =====
-export class EventDetailDto {
+export class ResponseEventDto {
   id: number;
   title: string;
   description: string | null;
@@ -139,6 +138,6 @@ export class EventDetailDto {
 
   // parts of relations
   userId: number;
+  recurringEventId: number | null;
   location: ResponseLocationDto | null;
-  recurringEvent: ResponseRecurringDto | null;
 }

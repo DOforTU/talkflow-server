@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RecurringEventRepository } from './recurring-event.repository';
 import { Prisma, RecurringEvent } from '@prisma/client';
-import { CreateRecurringEventData, RecurringData } from './recurring-event.dto';
+import {
+  CreateRecurringEventData,
+  RecurringData,
+  ResponseRecurringEventDto,
+} from './recurring-event.dto';
 import { EventData } from '../event/event.dto';
 
 @Injectable()
@@ -9,6 +13,8 @@ export class RecurringEventService {
   constructor(
     private readonly recurringEventRepository: RecurringEventRepository,
   ) {}
+
+  // ===== CREATE =====
 
   async createRecurringEvent(
     data: CreateRecurringEventData,
@@ -41,5 +47,20 @@ export class RecurringEventService {
         locationId,
       },
     });
+  }
+
+  // ===== READ =====
+
+  async getRecurringEventById(
+    userId: number,
+    id: number,
+  ): Promise<ResponseRecurringEventDto> {
+    const recurring = await this.recurringEventRepository.findById(userId, id);
+
+    if (!recurring) {
+      throw new NotFoundException('Recurring event not found');
+    }
+
+    return recurring;
   }
 }

@@ -11,7 +11,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { EventService } from './event.service';
-import { CreateEventDto, EventDetailDto } from './event.dto';
+import { CreateEventDto, ResponseEventDto } from './event.dto';
 import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 
 @Controller('events')
@@ -40,7 +40,9 @@ export class EventController {
   // ===== READ =====
 
   @Get()
-  async getMyEvents(@Request() req: { user: User }): Promise<EventDetailDto[]> {
+  async getMyEvents(
+    @Request() req: { user: User },
+  ): Promise<ResponseEventDto[]> {
     return await this.eventService.getMyEvents(req.user.id);
   }
 

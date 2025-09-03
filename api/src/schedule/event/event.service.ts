@@ -4,14 +4,13 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { CreateEventDto, EventData, EventDetailDto } from './event.dto';
+import { CreateEventDto, EventData, ResponseEventDto } from './event.dto';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LocationService } from '../location/location.service';
 import { RecurringEventService } from '../recurring-event/recurring-event.service';
 import { RRule } from 'rrule';
-import { Event, Location, Prisma } from '@prisma/client';
+import { Event, Prisma } from '@prisma/client';
 import { RecurringData } from '../recurring-event/recurring-event.dto';
-import { ResponseLocationDto } from '../location/location.dto';
 
 @Injectable()
 export class EventService {
@@ -80,12 +79,12 @@ export class EventService {
   }
 
   // ===== READ =====
-  async getMyEvents(userId: number): Promise<EventDetailDto[]> {
+  async getMyEvents(userId: number): Promise<ResponseEventDto[]> {
     return await this.eventRepository.findEventsByUserId(userId);
   }
 
-  async getEventByIdAndUserId(eventId: number, userId: number): Promise<Event> {
-    const event = await this.eventRepository.findByIdAndUserId(eventId, userId);
+  async getEventById(eventId: number, userId: number): Promise<Event> {
+    const event = await this.eventRepository.findById(eventId, userId);
     if (!event) {
       throw new NotFoundException('Event not found');
     }
@@ -100,7 +99,7 @@ export class EventService {
    * @returns
    */
   async deleteSingleEvent(userId: number, eventId: number): Promise<Event> {
-    await this.getEventByIdAndUserId(eventId, userId); // 존재 여부 확인
+    await this.getEventById(eventId, userId); // 존재 여부 확인
     return await this.eventRepository.deleteSingleEvent(userId, eventId);
   }
 
@@ -111,7 +110,7 @@ export class EventService {
    * @returns
    */
   async deleteRecurringEvents(userId: number, eventId: number): Promise<void> {
-    const event = await this.getEventByIdAndUserId(eventId, userId);
+    const event = await this.getEventById(eventId, userId);
     if (!event.recurringEventId) {
       throw new BadRequestException('Event is not part of a recurring series');
     }
@@ -285,14 +284,21 @@ export class EventService {
    * @param startDateStr 시작 날짜
    * @returns 기본 종료일
    */
-  private calculateDefaultEndDate(rruleString: string, startDateStr: string): Date {
+  private calculateDefaultEndDate(
+    rruleString: string,
+    startDateStr: string,
+  ): Date {
     const startDate = new Date(startDateStr);
-    
+
     // YEARLY인 경우 5년 후 (5번 실행되도록)
     if (rruleString.includes('YEARLY')) {
-      return new Date(startDate.getFullYear() + 5, startDate.getMonth(), startDate.getDate());
+      return new Date(
+        startDate.getFullYear() + 5,
+        startDate.getMonth(),
+        startDate.getDate(),
+      );
     }
-    
+
     // 그 외의 경우 1년 후
     return new Date(startDate.getTime() + 12 * 30 * 24 * 60 * 60 * 1000);
   }

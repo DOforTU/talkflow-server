@@ -55,16 +55,15 @@ export interface CreateRecurringEventData {
   locationId?: number;
 }
 
-// ===== 서버가 클라이언트에게 응답하는 정보 DTO =====
+// 서버에서 클라이언트에게 응답하는 정보 DTO
 
-export class ResponseRecurringDto {
+export class ResponseRecurringEventDto {
   id: number;
+  userId: number;
   rule: string;
-  startDate: string; // "2025-09-01" 형식
-  endDate: string | null; // "2025-09-30" 형식
+  startDate: string;
+  endDate: string | null;
   title: string;
   description: string | null;
   colorCode: string;
-  version: number;
-  location: ResponseLocationDto | null;
 }

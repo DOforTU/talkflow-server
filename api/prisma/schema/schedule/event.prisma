@@ -1,30 +1,29 @@
 model Event{
   // Primary Key
-  id          Int       @id @default(autoincrement()) @db.Integer
+  id          Int    @id @default(autoincrement()) @db.Integer
 
-  // Event Information
-  title       String    @db.VarChar
-  description String?   @db.VarChar
-  startTime   String    @db.VarChar(16) // "2025-09-01 19:30" 형식
-  endTime     String    @db.VarChar(16) // "2025-09-01 21:00" 형식
-  isAllDay    Boolean   @default(false)
-  colorCode   String    @db.VarChar(7)
-  version     Int       @default(1)
+  // Event Information: 반복 일정인 경우 DB 용량 최적화를 위해 NULL로 저장하고, 
+  // recurringEvent를 참고
+  title       String      @db.VarChar
+  description String?     @db.VarChar
+  startTime   String      @db.VarChar(16) // "2025-09-01 19:30" 형식
+  endTime     String      @db.VarChar(16) // "2025-09-01 21:00" 형식
+  isAllDay    Boolean     @default(false)
+  colorCode   String      @db.VarChar(7)
 
   // Relations 
   userId            Int
-  user              User   @relation(fields: [userId], references: [id])
+  user              User            @relation(fields: [userId], references: [id])
   recurringEventId  Int?
   recurringEvent    RecurringEvent? @relation(fields: [recurringEventId], references: [id])
   locationId        Int?
-  location          Location? @relation(fields: [locationId], references: [id])
+  location          Location?       @relation(fields: [locationId], references: [id])
 
   // Timestamps (Common fields)
   createdAt   DateTime  @default(now()) @db.Timestamp(6)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
   deletedAt   DateTime? @db.Timestamp(6)
-
-
+  version     Int       @default(1)
 
   @@map("event")
 }
@@ -35,12 +34,16 @@ model RecurringEvent{
 
   // Recurring Event Information
   rule        String    @db.VarChar(255)
-  startDate   String    @db.VarChar(10) // "2025-09-01" 형식
-  endDate     String?   @db.VarChar(10) // "2025-09-30" 형식
+  // 반복 일정 범위
+  startDate   String    @db.VarChar(10) 
+  endDate     String?   @db.VarChar(10) 
+  
+  // event에 어차피 값을 둘거고, 읽기 시에 사용 안할건데 필요한가 싶음...)
   title       String    @db.VarChar
   description String?   @db.VarChar
   colorCode   String    @db.VarChar(7)
-  version     Int       @default(1)
+  startTime   String    @db.VarChar(16) // "2025-09-01 19:30" 형식
+  endTime     String    @db.VarChar(16) // "2025-09-01 21:00" 형식
 
   // Relation
   userId      Int
@@ -53,6 +56,7 @@ model RecurringEvent{
   createdAt   DateTime  @default(now()) @db.Timestamp(6)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(6)
   deletedAt   DateTime? @db.Timestamp(6)
+  version     Int       @default(1)
 
   @@map("recurring_event")
 }
