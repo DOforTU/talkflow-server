@@ -35,20 +35,27 @@ export class RecurringEventService {
     recurring: RecurringData,
     locationId?: number,
   ): Promise<RecurringEvent> {
-    return await tx.recurringEvent.create({
-      data: {
-        rule: recurring.rule,
-        startDate: recurring.startDate, // 이미 문자열
-        endDate: recurring.endDate || null,
-        title: eventData.title,
-        description: eventData.description,
-        colorCode: eventData.colorCode,
-        startTime: eventData.startTime,
-        endTime: eventData.endTime,
-        userId,
-        locationId,
-      },
-    });
+    // RRULE에 UNTIL 추가 (endDate를 UNTIL 형식으로 변환)
+    let ruleWithUntil = recurring.rule;
+    if (recurring.endDate && !recurring.rule.includes('UNTIL=')) {
+      const endDate = new Date(recurring.endDate);
+      const untilDateStr =
+        endDate.getFullYear() +
+        String(endDate.getMonth() + 1).padStart(2, '0') +
+        String(endDate.getDate()).padStart(2, '0'); // YYYYMMDD 형식
+      ruleWithUntil += `;UNTIL=${untilDateStr}`;
+    }
+
+    // recurring 업데이트
+    recurring.rule = ruleWithUntil;
+
+    return await this.recurringEventRepository.createRecurringEventWithTransaction(
+      tx,
+      userId,
+      eventData,
+      recurring,
+      locationId,
+    );
   }
 
   // ===== READ =====

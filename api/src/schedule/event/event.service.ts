@@ -244,7 +244,7 @@ export class EventService {
   private generateRecurringDateStrings(
     rruleString: string,
     startDateStr: string,
-    endDateStr?: string,
+    endDateStr: string,
   ): string[] {
     try {
       // 문자열을 직접 DTSTART로 사용 (시간대 변환 없음)
@@ -252,14 +252,12 @@ export class EventService {
 
       const rule = RRule.fromString(`DTSTART:${dtstart}\nRRULE:${rruleString}`);
 
-      // 종료 날짜 설정 (주기별 차등 적용)
-      const endDate = endDateStr
-        ? new Date(endDateStr)
-        : this.calculateDefaultEndDate(rruleString, startDateStr);
+      // 종료 날짜 설정 (프론트에서 항상 전달됨)
+      const endDate = new Date(endDateStr!);
 
       // RRule에서 날짜들을 생성하고 문자열로 변환
       return rule
-        .all((date, i) => date <= endDate && i < 100)
+        .all((date) => date <= endDate)
         .map((date) => {
           // Date를 로컬 날짜 문자열로 변환 (시간대 변환 없음)
           const year = date.getFullYear();
@@ -294,30 +292,5 @@ export class EventService {
     const newEnd = `${newDateStr} ${endTimePart}`;
 
     return { newStart, newEnd };
-  }
-
-  /**
-   * 반복 주기에 따라 기본 종료일 계산
-   * @param rruleString RRULE 문자열
-   * @param startDateStr 시작 날짜
-   * @returns 기본 종료일
-   */
-  private calculateDefaultEndDate(
-    rruleString: string,
-    startDateStr: string,
-  ): Date {
-    const startDate = new Date(startDateStr);
-
-    // YEARLY인 경우 5년 후 (5번 실행되도록)
-    if (rruleString.includes('YEARLY')) {
-      return new Date(
-        startDate.getFullYear() + 5,
-        startDate.getMonth(),
-        startDate.getDate(),
-      );
-    }
-
-    // 그 외의 경우 1년 후
-    return new Date(startDate.getTime() + 12 * 30 * 24 * 60 * 60 * 1000);
   }
 }

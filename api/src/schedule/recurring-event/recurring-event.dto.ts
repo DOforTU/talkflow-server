@@ -11,14 +11,10 @@ export class CreateRecurringRuleDto {
   @IsDateString()
   startDate: string;
 
-  /**
-   * 클라이언트가 전송하지 않으면 undefined
-   * undefined의 경우에는 일정을 무한히 생성하는 것이 아닌
-   * 6개월치 생성 후 매 주마다 업데이트(추가 생성)하는 방식으로 구현
-   */
-  @IsOptional()
+  // 사용자는 endDate를 설정하지 않아도 되지만,
+  // 클라이언트가 알아서 보냄
   @IsDateString()
-  endDate?: string;
+  endDate: string;
 }
 
 export class UpdateRecurringEventDto {
@@ -41,7 +37,7 @@ export class UpdateRecurringEventDto {
 export interface RecurringData {
   rule: string;
   startDate: string; // "2025-09-01" 형식
-  endDate?: string; // "2025-09-30" 형식
+  endDate: string; // "2025-09-30" 형식
 }
 
 export interface CreateRecurringEventData {
