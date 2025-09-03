@@ -218,8 +218,8 @@ export class EventService {
     // 1. RecurringEvent 조회
     const recurringEvent =
       await this.recurringEventService.getRecurringEventById(
-        userId,
         event.recurringEventId,
+        userId,
       );
 
     // 2. 새로운 종료 날짜 계산
@@ -401,18 +401,23 @@ export class EventService {
     // 원본 날짜와 시간 부분 분리
     const [originalStartDate, startTimePart] = originalStart.split(' ');
     const [originalEndDate, endTimePart] = originalEnd.split(' ');
-    
+
     // 원본 시작일과 종료일 간의 날짜 차이 계산
     const originalStartDateObj = new Date(originalStartDate);
     const originalEndDateObj = new Date(originalEndDate);
-    const daysDiff = Math.floor((originalEndDateObj.getTime() - originalStartDateObj.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const daysDiff = Math.floor(
+      (originalEndDateObj.getTime() - originalStartDateObj.getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
+
     // 새로운 시작 날짜
     const newStart = `${newDateStr} ${startTimePart}`;
-    
+
     // 새로운 종료 날짜 (원본 차이만큼 더함)
     const newStartDateObj = new Date(newDateStr);
-    const newEndDateObj = new Date(newStartDateObj.getTime() + (daysDiff * 1000 * 60 * 60 * 24));
+    const newEndDateObj = new Date(
+      newStartDateObj.getTime() + daysDiff * 1000 * 60 * 60 * 24,
+    );
     const newEndDateStr = `${newEndDateObj.getFullYear()}-${String(newEndDateObj.getMonth() + 1).padStart(2, '0')}-${String(newEndDateObj.getDate()).padStart(2, '0')}`;
     const newEnd = `${newEndDateStr} ${endTimePart}`;
 
