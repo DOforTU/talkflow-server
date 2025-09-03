@@ -1,0 +1,18 @@
+model Follow {
+  // Primary Key
+  id          Int       @id @default(autoincrement()) @db.Integer
+
+  followerId  Int
+  follower    Profile   @relation("follower_profile", fields: [followerId], references: [id])
+
+  followingId Int
+  following   Profile   @relation("following_profile", fields: [followingId], references: [id])
+
+  // Timestamps (Common fields)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  deletedAt   DateTime? @db.Timestamp(6)
+
+  @@unique([followerId, followingId])
+  @@map("follow")
+
+}

@@ -1,68 +1,78 @@
-// import {
-//   Controller,
-//   Delete,
-//   Get,
-//   Param,
-//   Post,
-//   Request,
-//   UseGuards,
-// } from '@nestjs/common';
-// import { FollowService } from './follow.service';
-// import { User } from '@prisma/client';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { FollowService } from './follow.service';
+import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
+import { Follow, Profile, User } from '@prisma/client';
 
-// @Controller('users')
-// export class FollowController {
-//   constructor(private readonly followService: FollowService) {}
+@Controller('profiles')
+export class FollowController {
+  constructor(private readonly followService: FollowService) {}
 
-//   // ===== CREATE =====
+  // ===== CREATE =====
 
-//   @Post(':id/follow')
-//   @UseGuards(SmartAuthGuard)
-//   async followUser(
-//     @Request() req: { user: User },
-//     @Param('id') id: number,
-//   ): Promise<Follow> {
-//     return await this.followService.followUser(req.user.id, id);
-//   }
+  @Post(':id/follow')
+  @UseGuards(OnBoardingGuard)
+  async followUser(
+    @Request() req: { user: User },
+    @Param('id') id: number,
+  ): Promise<Follow> {
+    return await this.followService.followUser(req.user.id, id);
+  }
 
-//   // ===== READ =====
+  // ===== READ =====
 
-//   /** Get my followers */
-//   @Get('me/followers')
-//   @UseGuards(SmartAuthGuard)
-//   async getMyFollowers(@Request() req: { user: User }): Promise<PublicUser[]> {
-//     return toPublicUsers(await this.followService.getFollowers(req.user.id));
-//   }
+  /** Get my followers */
+  @Get('me/followers')
+  @UseGuards(OnBoardingGuard)
+  async getMyFollowers(@Request() req: { user: User }): Promise<Profile[]> {
+    return await this.followService.getFollowers(req.user.id);
+  }
 
-//   /** Get my followings */
-//   @Get('me/followings')
-//   @UseGuards(SmartAuthGuard)
-//   async getMyFollowings(@Request() req: { user: User }): Promise<PublicUser[]> {
-//     return toPublicUsers(await this.followService.getFollowings(req.user.id));
-//   }
+  /** Get my followings */
+  @Get('me/followings')
+  @UseGuards(OnBoardingGuard)
+  async getMyFollowings(@Request() req: { user: User }): Promise<Profile[]> {
+    return await this.followService.getFollowings(req.user.id);
+  }
 
-//   /** Get users who follow me */
-//   @Get(':id/followers')
-//   async getFollowers(@Param('id') id: number): Promise<PublicUser[] | null> {
-//     return toPublicUsers(await this.followService.getFollowers(id));
-//   }
+  /** Get users who follow specific user */
+  @Get(':id/followers')
+  @UseGuards(OnBoardingGuard)
+  async getFollowers(
+    @Request() req: { user: User },
+    @Param('id') id: number,
+  ): Promise<Profile[] | null> {
+    return await this.followService.getFollowers(id);
+  }
 
-//   /** Get users I follow */
-//   @Get(':id/followings')
-//   async getFollowings(@Param('id') id: number): Promise<PublicUser[] | null> {
-//     return toPublicUsers(await this.followService.getFollowings(id));
-//   }
+  /** Get users that specific user follows */
+  @Get(':id/followings')
+  @UseGuards(OnBoardingGuard)
+  async getFollowings(
+    @Request() req: { user: User },
+    @Param('id') id: number,
+  ): Promise<Profile[] | null> {
+    return await this.followService.getFollowings(id);
+  }
 
-//   // ===== UPDATE =====
+  // ===== UPDATE =====
 
-//   // ===== DELETE =====
+  @Patch(':id/follow')
+  @UseGuards(OnBoardingGuard)
+  async unfollowUser(
+    @Request() req: { user: User },
+    @Param('id') id: number,
+  ): Promise<boolean> {
+    return await this.followService.unfollowUser(req.user.id, id);
+  }
 
-//   @Delete(':id/unfollow')
-//   @UseGuards(SmartAuthGuard)
-//   async unfollowUser(
-//     @Request() req: { user: User },
-//     @Param('id') id: number,
-//   ): Promise<boolean> {
-//     return await this.followService.unfollowUser(req.user.id, id);
-//   }
-// }
+  // ===== DELETE =====
+}
