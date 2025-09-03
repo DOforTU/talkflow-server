@@ -54,4 +54,17 @@ export class FollowRepository {
     });
     return true;
   }
+
+  // ----- SUB FUNCTION -----
+
+  async isFollowing(followerId: number, followingId: number): Promise<boolean> {
+    const follow = await this.prisma.follow.findFirst({
+      where: {
+        followerId,
+        followingId,
+        deletedAt: null,
+      },
+    });
+    return follow !== null;
+  }
 }

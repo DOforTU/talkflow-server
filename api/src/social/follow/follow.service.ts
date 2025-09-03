@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Follow, Profile } from '@prisma/client';
 import { ProfileService } from 'src/account/profile/profile.service';
 import { FollowRepository } from './follow.repository';
@@ -12,8 +12,21 @@ export class FollowService {
 
   // ----- CREATE -----
 
+  /**
+   *
+   * @param userId
+   * @param followingId 팔로우할 아이디가 있는지를 확인해야하나?
+   * @returns
+   */
   async followUser(userId: number, followingId: number): Promise<Follow> {
     const profile = await this.profileService.getProfileById(userId);
+    const isFollowing = await this.followRepository.isFollowing(
+      profile.id,
+      followingId,
+    );
+    if (isFollowing) {
+      throw new ConflictException('You are already following this user');
+    }
     return await this.followRepository.followUser(profile.id, followingId);
   }
 
@@ -33,6 +46,13 @@ export class FollowService {
 
   async unfollowUser(userId: number, followingId: number): Promise<boolean> {
     const profile = await this.profileService.getProfileById(userId);
+    const isFollowing = await this.followRepository.isFollowing(
+      profile.id,
+      followingId,
+    );
+    if (!isFollowing) {
+      throw new ConflictException('You did not follow this user');
+    }
     return await this.followRepository.unfollowUser(profile.id, followingId);
   }
 }
