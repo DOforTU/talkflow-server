@@ -3,7 +3,7 @@ import {
   IsOptional,
   IsString,
   IsBoolean,
-  IsInt,
+  IsNumber,
 } from 'class-validator';
 import { notice_type_enum } from '@prisma/client';
 
@@ -14,38 +14,20 @@ export class CreateNoticeDto {
   @IsString()
   title: string;
 
-  @IsOptional()
   @IsString()
-  content?: string;
+  content: string;
 
-  @IsInt()
-  targetId: number;
-
-  @IsOptional()
-  @IsInt()
-  actorId?: number;
+  // 알림을 받는 사람
+  @IsNumber()
+  profileId: number;
 
   @IsOptional()
-  @IsInt()
-  relatedFollowId?: number;
-
-  @IsOptional()
-  @IsInt()
-  relatedLikeId?: number;
-}
-
-export class UpdateNoticeDto {
-  @IsOptional()
-  @IsBoolean()
-  isRead?: boolean;
+  @IsNumber()
+  relatedEntityId?: number;
 
   @IsOptional()
   @IsString()
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  content?: string;
+  relatedEntityName?: string;
 }
 
 export class NoticeQueryDto {
@@ -61,11 +43,11 @@ export class NoticeQueryDto {
 
   // 한 번에 알림을 몇개까지 볼 수 있는지
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   limit?: number = 20;
 
   // 몇 개 건너뛸건지 근데 20개씩 볼 수 있게 건너뜀 없음
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   offset?: number = 0;
 }
