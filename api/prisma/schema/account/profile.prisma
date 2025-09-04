@@ -27,6 +27,13 @@ model Profile {
   user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   silhouettes  Silhouette[]
   likes     SilhouetteLike[]  
+  followers  Follow[] @relation("following_profile")
+  followings Follow[] @relation("follower_profile") 
+  // 내가 팔로잉하는 사람은 팔로우 엔터티에서 팔로워에 존재함
+  // 팔로워안에 나를 찾으면 그게 내가 팔로잉한 사람들
+  
+  // Notice Relations
+  notices Notice[]
 
   @@unique([nickname, deletedAt])
   @@map("profile")

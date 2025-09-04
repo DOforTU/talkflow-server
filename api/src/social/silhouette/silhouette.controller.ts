@@ -14,7 +14,7 @@ import { Silhouette, User } from '@prisma/client';
 import { CreateSilhouettesDto, ResponseSilhouette } from './silhoutette.dto';
 import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 
-@Controller('silhouette')
+@Controller('silhouettes')
 export class SilhouetteController {
   constructor(private readonly silhouetteService: SilhouetteService) {}
 
