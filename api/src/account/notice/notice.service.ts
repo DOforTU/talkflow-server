@@ -80,4 +80,11 @@ export class NoticeService {
       }
     }
   }
+
+  async cleanupOldNotices(): Promise<{ deletedCount: number }> {
+    const daysOld: number = 60;
+    const deletedCount = await this.noticeRepository.cleanupOldNotices(daysOld);
+
+    return { deletedCount };
+  }
 }
