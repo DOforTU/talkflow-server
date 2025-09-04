@@ -14,6 +14,7 @@ import { RecurringEventModule } from './schedule/recurring-event/recurring-event
 import { SilhouetteLikeModule } from './social/silhouette-like/silhouette-like.module';
 import { SilhouetteModule } from './social/silhouette/silhouette.module';
 import { FollowModule } from './social/follow/follow.module';
+import { NoticeModule } from './account/notice/notice.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FollowModule } from './social/follow/follow.module';
     SilhouetteModule,
     SilhouetteLikeModule,
     FollowModule,
+    NoticeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

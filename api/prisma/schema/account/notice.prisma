@@ -1,0 +1,41 @@
+enum notice_type_enum {
+  FOLLOW          // 팔로우 알림
+  LIKE            // 좋아요 알림  
+  SYSTEM          // 시스템 알림
+}
+
+model Notice {
+  // Primary Key
+  id          Int                @id @default(autoincrement()) @db.Integer
+  
+  // Notice Information
+  type        notice_type_enum
+  title       String             @db.VarChar(255)
+  content     String?            @db.Text
+  isRead      Boolean            @default(false) @db.Boolean
+  
+  // Target Information (알림을 받는 사람)
+  targetId    Int
+  target      Profile            @relation("notice_target", fields: [targetId], references: [id], onDelete: Cascade)
+  
+  // Actor Information (알림을 발생시킨 사람, 시스템 알림의 경우 null)
+  actorId     Int?
+  actor       Profile?           @relation("notice_actor", fields: [actorId], references: [id], onDelete: SetNull)
+  
+  // Follow Information (type이 FOLLOW일 경우에만 값이 존재) 팔로우 알림
+  relatedFollowId      Int?
+  relatedFollow        Follow? @relation(fields: [relatedFollowId], references: [id], onDelete: Cascade)
+  
+  // Like Information (type이 LIKE일 경우에만 값이 존재) 좋아요 알림
+  relatedLikeId        Int?
+  relatedLike          SilhouetteLike? @relation(fields: [relatedLikeId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt   DateTime           @default(now()) @db.Timestamp(6)
+  readAt      DateTime?          @db.Timestamp(6)
+  deletedAt   DateTime?          @db.Timestamp(6)
+  
+  @@index([targetId, isRead])
+  @@index([targetId, createdAt])
+  @@map("notice")
+}
