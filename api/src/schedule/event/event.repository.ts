@@ -1,7 +1,7 @@
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Event, Prisma } from '@prisma/client';
-import { EventData, EventDetailDto } from './event.dto';
+import { EventData, ResponseEventDto } from './event.dto';
 
 @Injectable()
 export class EventRepository {
@@ -46,14 +46,14 @@ export class EventRepository {
         isAllDay: eventData.isAllDay,
         userId,
         locationId,
-        recurringEventId,
+        recurringEventId: recurringEventId === 0 ? null : recurringEventId, // 0이면 null로 설정
       },
     });
   }
 
   // ===== READ =====
 
-  async findEventsByUserId(userId: number): Promise<EventDetailDto[]> {
+  async findEventsByUserId(userId: number): Promise<ResponseEventDto[]> {
     return await this.prismaService.event.findMany({
       where: { userId, deletedAt: null },
       select: {
@@ -73,6 +73,7 @@ export class EventRepository {
 
         // parts of relations
         userId: true,
+        recurringEventId: true,
         location: {
           select: {
             id: true,
@@ -83,41 +84,59 @@ export class EventRepository {
             longitude: true,
           },
         },
-        recurringEvent: {
-          select: {
-            id: true,
-            rule: true,
-            startDate: true,
-            endDate: true,
-            title: true,
-            description: true,
-            colorCode: true,
-            version: true,
-            location: {
-              select: {
-                id: true,
-                nameKo: true,
-                nameEn: true,
-                address: true,
-                latitude: true,
-                longitude: true,
-              },
-            },
-          },
-        },
       },
     });
   }
 
-  async findByIdAndUserId(
-    eventId: number,
-    userId: number,
-  ): Promise<Event | null> {
+  async findById(eventId: number, userId: number): Promise<Event | null> {
     return await this.prismaService.event.findFirst({
       where: {
         id: eventId,
         userId: userId,
         deletedAt: null,
+      },
+    });
+  }
+
+  // ===== UPDATE =====
+
+  async updateSingleEvent(
+    userId: number,
+    eventId: number,
+    eventData: Partial<EventData>,
+    locationId?: number,
+  ): Promise<Event> {
+    return await this.prismaService.event.update({
+      where: {
+        id: eventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        ...eventData,
+        locationId,
+        version: {
+          increment: 1,
+        },
+      },
+    });
+  }
+
+  async updateEventsByRecurringEventId(
+    userId: number,
+    recurringEventId: number,
+    eventData: Partial<EventData>,
+    locationId?: number,
+  ): Promise<void> {
+    await this.prismaService.event.updateMany({
+      where: {
+        recurringEventId: recurringEventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        ...eventData,
+        locationId,
       },
     });
   }
@@ -161,6 +180,63 @@ export class EventRepository {
       },
       data: {
         deletedAt: new Date(),
+      },
+    });
+  }
+
+  async softDeleteFutureEventsByTransaction(
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
+    userId: number,
+    recurringEventId: number,
+    fromStartTime: string,
+  ): Promise<void> {
+    await tx.event.updateMany({
+      where: {
+        recurringEventId: recurringEventId,
+        userId: userId,
+        startTime: {
+          gte: fromStartTime,
+        },
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  }
+
+  async findRecurringEventById(
+    userId: number,
+    recurringEventId: number,
+  ): Promise<any | null> {
+    return await this.prismaService.recurringEvent.findFirst({
+      where: {
+        id: recurringEventId,
+        userId: userId,
+        deletedAt: null,
+      },
+    });
+  }
+
+  async updateRecurringEventRuleByTransaction(
+    tx: Omit<
+      Prisma.TransactionClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+    >,
+    recurringEventId: number,
+    updatedRule: string,
+    endDateStr: string,
+  ): Promise<void> {
+    await tx.recurringEvent.update({
+      where: {
+        id: recurringEventId,
+      },
+      data: {
+        rule: updatedRule,
+        endDate: endDateStr,
       },
     });
   }

@@ -9,9 +9,10 @@ import {
   Delete,
   Param,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { EventService } from './event.service';
-import { CreateEventDto, EventDetailDto } from './event.dto';
+import { CreateEventDto, ResponseEventDto, UpdateEventDto } from './event.dto';
 import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 
 @Controller('events')
@@ -40,8 +41,52 @@ export class EventController {
   // ===== READ =====
 
   @Get()
-  async getMyEvents(@Request() req: { user: User }): Promise<EventDetailDto[]> {
+  async getMyEvents(
+    @Request() req: { user: User },
+  ): Promise<ResponseEventDto[]> {
     return await this.eventService.getMyEvents(req.user.id);
+  }
+
+  // ===== UPDATE =====
+
+  /**
+   * 단일 이벤트 업데이트
+   * @param req
+   * @param eventId
+   * @param updateEventDto
+   * @returns
+   */
+  @Patch(':id')
+  async updateSingleEvent(
+    @Request() req: { user: User },
+    @Param('id', ParseIntPipe) eventId: number,
+    @Body() updateEventDto: UpdateEventDto,
+  ): Promise<Event> {
+    return await this.eventService.updateSingleEvent(
+      req.user.id,
+      eventId,
+      updateEventDto,
+    );
+  }
+
+  /**
+   * 반복 이벤트 전체 업데이트
+   * @param req
+   * @param eventId
+   * @param updateEventDto
+   * @returns
+   */
+  @Patch(':id/recurring/all')
+  async updateRecurringEvents(
+    @Request() req: { user: User },
+    @Param('id', ParseIntPipe) eventId: number,
+    @Body() updateEventDto: UpdateEventDto,
+  ): Promise<void> {
+    return await this.eventService.updateRecurringEvents(
+      req.user.id,
+      eventId,
+      updateEventDto,
+    );
   }
 
   // ===== DELETE =====
@@ -72,5 +117,19 @@ export class EventController {
     @Param('id', ParseIntPipe) eventId: number,
   ): Promise<void> {
     return await this.eventService.deleteRecurringEvents(req.user.id, eventId);
+  }
+
+  /**
+   * 현재 일정부터 이후의 모든 반복 일정 삭제
+   * @param req
+   * @param eventId
+   * @returns
+   */
+  @Delete(':id/recurring/from-this')
+  async deleteEventsFromThis(
+    @Request() req: { user: User },
+    @Param('id', ParseIntPipe) eventId: number,
+  ): Promise<void> {
+    return await this.eventService.deleteEventsFromThis(req.user.id, eventId);
   }
 }
