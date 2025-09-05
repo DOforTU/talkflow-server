@@ -115,6 +115,8 @@ export class EventRepository {
       data: {
         ...eventData,
         locationId,
+        recurringEventId: null, // 반복 이벤트 수정에서 "이 일정만" 선택 시 단일 일정으로 간주
+        updatedAt: new Date(),
         version: {
           increment: 1,
         },
@@ -137,6 +139,8 @@ export class EventRepository {
       data: {
         ...eventData,
         locationId,
+        updatedAt: new Date(),
+        version: { increment: 1 },
       },
     });
   }
