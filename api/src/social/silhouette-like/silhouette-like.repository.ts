@@ -31,7 +31,11 @@ export class SilhouetteLikeRepository {
           silhouetteId,
         },
       },
-      data: { deletedAt: null },
+      data: {
+        deletedAt: null,
+        // 다시 좋아요를 누른 시점으로 업데이트
+        updatedAt: new Date(),
+      },
     });
   }
 
