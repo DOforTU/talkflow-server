@@ -1,9 +1,7 @@
 import {
   Controller,
-  Delete,
   Get,
   Param,
-  Patch,
   Post,
   Request,
   UseGuards,
@@ -24,7 +22,7 @@ export class FollowController {
     @Request() req: { user: User },
     @Param('id') id: number,
   ): Promise<Follow> {
-    return await this.followService.followUser(req.user.id, id);
+    return await this.followService.toggleFollow(req.user.id, id);
   }
 
   // ===== READ =====
@@ -64,15 +62,6 @@ export class FollowController {
   }
 
   // ===== UPDATE =====
-
-  @Patch(':id/follow')
-  @UseGuards(OnBoardingGuard)
-  async unfollowUser(
-    @Request() req: { user: User },
-    @Param('id') id: number,
-  ): Promise<boolean> {
-    return await this.followService.unfollowUser(req.user.id, id);
-  }
 
   // ===== DELETE =====
 }

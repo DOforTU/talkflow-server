@@ -18,14 +18,26 @@ export class FollowService {
    * @param followingId 팔로우할 아이디가 있는지를 확인해야하나?
    * @returns
    */
-  async followUser(userId: number, followingId: number): Promise<Follow> {
+  async toggleFollow(userId: number, followingId: number): Promise<Follow> {
     const profile = await this.profileService.getProfileById(userId);
+    if (profile.id === followingId) {
+      throw new ConflictException('You cannot follow yourself.');
+    }
     const isFollowing = await this.followRepository.isFollowing(
       profile.id,
       followingId,
     );
     if (isFollowing) {
-      throw new ConflictException('You are already following this user');
+      if (isFollowing.deletedAt != null) {
+        // 언팔로우 상태 -> 복구(다시 팔로우)
+        return await this.followRepository.followUser(profile.id, followingId);
+      } else {
+        // soft delete 상태
+        return await this.followRepository.unfollowUser(
+          profile.id,
+          followingId,
+        );
+      }
     }
     return await this.followRepository.followUser(profile.id, followingId);
   }
@@ -43,16 +55,4 @@ export class FollowService {
   }
 
   // ----- UPDATE -----
-
-  async unfollowUser(userId: number, followingId: number): Promise<boolean> {
-    const profile = await this.profileService.getProfileById(userId);
-    const isFollowing = await this.followRepository.isFollowing(
-      profile.id,
-      followingId,
-    );
-    if (!isFollowing) {
-      throw new ConflictException('You did not follow this user');
-    }
-    return await this.followRepository.unfollowUser(profile.id, followingId);
-  }
 }
