@@ -10,7 +10,8 @@ import {
   Patch,
 } from '@nestjs/common';
 import { AdminGuard } from 'src/common/guards/admin.guard';
-import { User } from '@prisma/client';
+import { RecurringEvent, Silhouette, User } from '@prisma/client';
+import { AdminService } from './admin.service';
 
 /**
  * AdminController
@@ -30,6 +31,7 @@ import { User } from '@prisma/client';
 @Controller('admin')
 @UseGuards(AdminGuard)
 export class AdminController {
+  constructor(private readonly adminService: AdminService) {}
   /**
    * 관리자 대시보드 정보 조회
    * - 전체 사용자 수
@@ -37,19 +39,10 @@ export class AdminController {
    * - 활성 사용자 수
    * - 신고 대기 건수
    */
-  @Get('dashboard')
-  async getDashboard(@Request() req: { user: User }) {
-    return {
-      message: '관리자 대시보드',
-      admin: req.user.email,
-      stats: {
-        totalUsers: 1250,
-        todaySignups: 12,
-        activeUsers: 890,
-        pendingReports: 5,
-      },
-    };
-  }
+  //@Get('dashboard')
+  //async getDashboard(@Request() req: { user: User }) {
+  //  return await this.adminService.getDashboard();
+  //}
 
   /**
    * 전체 사용자 목록 조회
@@ -58,58 +51,47 @@ export class AdminController {
    * - 정렬 기능
    */
   @Get('users')
-  async getAllUsers(@Request() req: { user: User }) {
-    return {
-      message: '전체 사용자 목록',
-      admin: req.user.email,
-      users: [
-        {
-          id: 1,
-          email: 'user1@example.com',
-          nickname: '사용자1',
-          status: 'active',
-        },
-        {
-          id: 2,
-          email: 'user2@example.com',
-          nickname: '사용자2',
-          status: 'active',
-        },
-        {
-          id: 3,
-          email: 'user3@example.com',
-          nickname: '사용자3',
-          status: 'blocked',
-        },
-      ],
-    };
+  async getAllUsers(): Promise<User[]> {
+    return await this.adminService.getAllUsers();
   }
 
   /**
-   * 특정 사용자 상세 정보 조회
+   * soft delete된 사용자만 전체 조회
    * - 사용자 기본 정보
-   * - 활동 통계
-   * - 신고 이력
    */
-  @Get('users/:id')
-  async getUserDetail(
-    @Request() req: { user: User },
-    @Param('id') userId: string,
-  ) {
-    return {
-      message: `사용자 ${userId} 상세 정보`,
-      admin: req.user.email,
-      user: {
-        id: userId,
-        email: 'user@example.com',
-        nickname: '사용자',
-        createdAt: new Date(),
-        posts: 25,
-        followers: 100,
-        reports: [],
-      },
-    };
+  @Get('deleted-users')
+  async getDeletedUsers(): Promise<User[]> {
+    return await this.adminService.getDeletedUsers();
   }
+
+  /**
+   * soft delete된 event만 전체 조회
+   * - 이벤트 기본 정보
+   */
+  @Get('deleted-events')
+  async getDeletedEvents(): Promise<Event[]> {
+    return await this.adminService.getDeletedEvents();
+  }
+
+  /**
+   * soft delete된 recurringEvent만 전체 조회
+   * - 이벤트 기본 정보
+   */
+  @Get('deleted-recurring-events')
+  async getDeletedRecurringEvents(): Promise<RecurringEvent[]> {
+    return await this.adminService.getDeletedRecurringEvents();
+  }
+
+  /**
+   * soft delete된 silhouette만 전체 조회
+   * - 실루엣 기본 정보
+   */
+  @Get('deleted-silhouettes')
+  async getDeletedSilhouettes(): Promise<Silhouette[]> {
+    return await this.adminService.getDeletedSilhouettes();
+  }
+
+  // ----- 사용자 및 신고 관리 메서드들 -----
 
   /**
    * 사용자 계정 차단
