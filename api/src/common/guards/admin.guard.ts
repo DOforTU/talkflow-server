@@ -39,6 +39,7 @@ export class AdminGuard extends JwtAuthGuard {
       user.role === user_role_enum.super_admin;
     if (!isAdmin) throw new UnauthorizedException('User is not an admin');
 
+    // user가 존재하고 isAdmin이 true인 경우에만 true 반환
     return user && isAdmin;
   }
 }
