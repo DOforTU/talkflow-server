@@ -45,6 +45,7 @@ export class SilhouetteRepository {
       select: {
         id: true,
         contentUrl: true,
+        title: true,
         type: true,
         runningTime: true,
         isPublic: true,

@@ -8,10 +8,11 @@ model Silhouette {
   id          Int       @id @default(autoincrement()) @db.Integer
 
   // Silhouette Information
-  contentUrl  String    @db.VarChar
-  type        content_enum
-  runningTime Float  @db.DoublePrecision() @default(15.0)
-  isPublic    Boolean  @default(false)
+  contentUrl  String        @db.VarChar
+  title       String?       @db.VarChar
+  type        content_enum  @default(image)
+  runningTime Float         @db.DoublePrecision() @default(15.0)
+  isPublic    Boolean       @default(false)
 
   profileId Int
   profile   Profile   @relation(fields: [profileId], references: [id])
