@@ -9,16 +9,19 @@ export class FollowRepository {
   // ===== CREATE =====
 
   async followUser(followerId: number, followingId: number): Promise<Follow> {
-    return await this.prisma.follow.update({
+    return await this.prisma.follow.upsert({
       where: {
         followerId_followingId: {
           followerId,
           followingId,
         },
       },
-      data: {
-        follower: { connect: { id: followerId } },
-        following: { connect: { id: followingId } },
+      update: {
+        deletedAt: null,
+      },
+      create: {
+        followerId,
+        followingId,
         deletedAt: null,
       },
     });
