@@ -12,29 +12,20 @@ export class SilhouetteLikeRepository {
     profileId: number,
     silhouetteId: number,
   ): Promise<SilhouetteLike> {
-    return await this.prisma.silhouetteLike.create({
-      data: { profileId, silhouetteId },
-    });
-  }
-
-  // ----- UPDATE -----
-
-  async restoreLike(
-    profileId: number,
-    silhouetteId: number,
-  ): Promise<SilhouetteLike> {
-    return await this.prisma.silhouetteLike.update({
+    return await this.prisma.silhouetteLike.upsert({
       where: {
         profileId_silhouetteId: {
-          // 복합키 이름 (스키마에서 @@unique로 지정한 이름) 프리즈마 문법같음
           profileId,
           silhouetteId,
         },
       },
-      data: {
+      update: {
         deletedAt: null,
-        // 다시 좋아요를 누른 시점으로 업데이트
-        updatedAt: new Date(),
+      },
+      create: {
+        profileId,
+        silhouetteId,
+        deletedAt: null,
       },
     });
   }

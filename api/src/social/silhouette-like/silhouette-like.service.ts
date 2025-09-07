@@ -39,7 +39,7 @@ export class SilhouetteLikeService {
         );
       } else {
         // soft delete 상태면 복구
-        return await this.silhouetteLikeRepository.restoreLike(
+        return await this.silhouetteLikeRepository.createLike(
           profile.id,
           silhouetteId,
         );
