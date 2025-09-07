@@ -43,7 +43,6 @@ export class FollowController {
 
   /** Get users who follow specific user */
   @Get(':id/followers')
-  @UseGuards(OnBoardingGuard)
   async getFollowers(
     @Request() req: { user: User },
     @Param('id') id: number,
@@ -53,12 +52,19 @@ export class FollowController {
 
   /** Get users that specific user follows */
   @Get(':id/followings')
-  @UseGuards(OnBoardingGuard)
   async getFollowings(
     @Request() req: { user: User },
     @Param('id') id: number,
   ): Promise<Profile[] | null> {
     return await this.followService.getFollowings(id);
+  }
+
+  /** Get users follower/following count */
+  @Get(':id/follow-counts')
+  async getFollowCounts(
+    @Param('id') id: number,
+  ): Promise<{ followers: number; followings: number } | null> {
+    return await this.followService.getFollowCounts(id);
   }
 
   // ===== UPDATE =====

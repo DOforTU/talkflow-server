@@ -6,7 +6,7 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 export class FollowRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  // ----- CREATE -----
+  // ===== CREATE =====
 
   async followUser(followerId: number, followingId: number): Promise<Follow> {
     return await this.prisma.follow.update({
@@ -24,7 +24,7 @@ export class FollowRepository {
     });
   }
 
-  // ----- READ -----
+  // ===== READ =====
 
   async getFollowers(followingId: number): Promise<Profile[]> {
     const followers = await this.prisma.follow.findMany({
@@ -42,7 +42,19 @@ export class FollowRepository {
     return followings.map((follow) => follow.following);
   }
 
-  // ----- UPDATE -----
+  async getFollowCounts(
+    profileId: number,
+  ): Promise<{ followers: number; followings: number } | null> {
+    const followers = await this.prisma.follow.count({
+      where: { followingId: profileId, deletedAt: null },
+    });
+    const followings = await this.prisma.follow.count({
+      where: { followerId: profileId, deletedAt: null },
+    });
+    return { followers, followings };
+  }
+
+  // ===== UPDATE =====
 
   async unfollowUser(followerId: number, followingId: number): Promise<Follow> {
     return await this.prisma.follow.update({
@@ -58,7 +70,7 @@ export class FollowRepository {
     });
   }
 
-  // ----- SUB FUNCTION -----
+  // ===== SUB FUNCTION =====
 
   async isFollowing(
     followerId: number,

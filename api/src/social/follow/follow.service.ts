@@ -10,7 +10,7 @@ export class FollowService {
     private readonly profileService: ProfileService,
   ) {}
 
-  // ----- CREATE -----
+  // ===== CREATE =====
 
   /**
    *
@@ -42,17 +42,24 @@ export class FollowService {
     return await this.followRepository.followUser(profile.id, followingId);
   }
 
-  // ----- READ -----
+  // ===== READ =====
 
-  async getFollowers(userId: number): Promise<Profile[]> {
-    const profile = await this.profileService.getProfileById(userId);
+  async getFollowers(profileId: number): Promise<Profile[]> {
+    const profile = await this.profileService.getProfileById(profileId);
     return await this.followRepository.getFollowers(profile.id);
   }
 
-  async getFollowings(userId: number): Promise<Profile[]> {
-    const profile = await this.profileService.getProfileById(userId);
+  async getFollowings(profileId: number): Promise<Profile[]> {
+    const profile = await this.profileService.getProfileById(profileId);
     return await this.followRepository.getFollowings(profile.id);
   }
 
-  // ----- UPDATE -----
+  async getFollowCounts(
+    profileId: number,
+  ): Promise<{ followers: number; followings: number } | null> {
+    const profile = await this.profileService.getProfileById(profileId);
+    return await this.followRepository.getFollowCounts(profile.id);
+  }
+
+  // ===== UPDATE =====
 }
