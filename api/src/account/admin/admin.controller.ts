@@ -10,7 +10,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { AdminGuard } from 'src/common/guards/admin.guard';
-import { RecurringEvent, Silhouette, User } from '@prisma/client';
+import { Event, RecurringEvent, Silhouette, User } from '@prisma/client';
 import { AdminService } from './admin.service';
 
 /**

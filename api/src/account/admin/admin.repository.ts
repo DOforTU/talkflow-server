@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { User, Event, RecurringEvent, Silhouette } from '@prisma/client';
+import { PrismaService } from 'src/common/prisma/prisma.service';
 
 /**
  * AdminService
@@ -76,8 +76,8 @@ export class AdminRepository {
         // 1. 관련 데이터들 hard delete
         await tx.profile.deleteMany({ where: { userId } });
         await tx.silhouette.deleteMany({ where: { profile: { userId } } });
-        await tx.event.deleteMany({ where: { profile: { userId } } });
-        await tx.recurringEvent.deleteMany({ where: { profile: { userId } } });
+        await tx.event.deleteMany({ where: { userId } });
+        await tx.recurringEvent.deleteMany({ where: { userId } });
         await tx.notice.deleteMany({ where: { profile: { userId } } });
         await tx.follow.deleteMany({
           where: {
@@ -112,13 +112,14 @@ export class AdminRepository {
         deletedAt: { not: null },
       },
       include: {
-        profile: {
+        user: {
           select: {
             id: true,
-            nickname: true,
-            user: {
+            email: true,
+            profile: {
               select: {
-                email: true,
+                id: true,
+                nickname: true,
               },
             },
           },
@@ -190,13 +191,14 @@ export class AdminRepository {
         deletedAt: { not: null },
       },
       include: {
-        profile: {
+        user: {
           select: {
             id: true,
-            nickname: true,
-            user: {
+            email: true,
+            profile: {
               select: {
-                email: true,
+                id: true,
+                nickname: true,
               },
             },
           },
@@ -304,7 +306,7 @@ export class AdminRepository {
 
         // 2. 관련 알림들 삭제
         await tx.notice.deleteMany({
-          where: { relatedSilhouetteId: silhouetteId },
+          where: { relatedEntityId: silhouetteId },
         });
 
         // 3. 실루엣 hard delete
@@ -342,7 +344,7 @@ export class AdminRepository {
 
         // 2. 관련 알림들 삭제
         await tx.notice.deleteMany({
-          where: { relatedSilhouetteId: { in: silhouetteIds } },
+          where: { relatedEntityId: { in: silhouetteIds } },
         });
 
         // 3. 실루엣들 hard delete
