@@ -9,10 +9,17 @@ export class FollowRepository {
   // ----- CREATE -----
 
   async followUser(followerId: number, followingId: number): Promise<Follow> {
-    return await this.prisma.follow.create({
+    return await this.prisma.follow.update({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId,
+        },
+      },
       data: {
         follower: { connect: { id: followerId } },
         following: { connect: { id: followingId } },
+        deletedAt: null,
       },
     });
   }
@@ -37,11 +44,8 @@ export class FollowRepository {
 
   // ----- UPDATE -----
 
-  async unfollowUser(
-    followerId: number,
-    followingId: number,
-  ): Promise<boolean> {
-    await this.prisma.follow.update({
+  async unfollowUser(followerId: number, followingId: number): Promise<Follow> {
+    return await this.prisma.follow.update({
       where: {
         followerId_followingId: {
           followerId,
@@ -52,12 +56,14 @@ export class FollowRepository {
         deletedAt: new Date(),
       },
     });
-    return true;
   }
 
   // ----- SUB FUNCTION -----
 
-  async isFollowing(followerId: number, followingId: number): Promise<boolean> {
+  async isFollowing(
+    followerId: number,
+    followingId: number,
+  ): Promise<Follow | null> {
     const follow = await this.prisma.follow.findFirst({
       where: {
         followerId,
@@ -65,6 +71,6 @@ export class FollowRepository {
         deletedAt: null,
       },
     });
-    return follow !== null;
+    return follow;
   }
 }

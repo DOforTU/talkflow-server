@@ -57,28 +57,31 @@ export class NoticeService {
     profileId: number,
     silhouetteOwnerId: number,
   ): Promise<Notice | null> {
-    // 1. 자신의 게시물이 아닌 경우에만 알림 로직 실행
-    if (profileId !== silhouetteOwnerId) {
-      // 2. 해당 실루엣의 총 좋아요 개수 확인
-      const likeCount = await tx.silhouetteLike.count({
-        where: {
-          silhouetteId,
-          deletedAt: null,
-        },
-      });
-
-      // 3. 10개 이상이면 알림 생성 (10, 20, 30... 배수일 때만)
-      if (likeCount >= 10 && likeCount % 10 === 0) {
-        const dto: CreateNoticeDto = {
-          type: notice_type_enum.like,
-          title: '좋아요',
-          content: `여러명이 회원님의 게시물에 좋아요를 눌렀습니다.`,
-          profileId: silhouetteOwnerId,
-        };
-
-        return await this.noticeRepository.create(tx, dto);
-      }
+    // 자신의 게시물이 아닌 경우에만 알림 로직 실행
+    if (profileId === silhouetteOwnerId) {
+      return null; // 자신의 게시물에는 알림 생성하지 않음
     }
+
+    // 해당 실루엣의 총 좋아요 개수 확인
+    const likeCount = await tx.silhouetteLike.count({
+      where: {
+        silhouetteId,
+        deletedAt: null,
+      },
+    });
+
+    // 10개 이상이면 알림 생성 (10, 20, 30... 배수일 때만)
+    if (likeCount >= 10 && likeCount % 10 === 0) {
+      const dto: CreateNoticeDto = {
+        type: notice_type_enum.like,
+        title: '좋아요',
+        content: `여러명이 회원님의 게시물에 좋아요를 눌렀습니다.`,
+        profileId: silhouetteOwnerId,
+      };
+
+      return await this.noticeRepository.create(tx, dto);
+    }
+
     return null;
   }
 
