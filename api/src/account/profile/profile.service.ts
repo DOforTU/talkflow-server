@@ -8,6 +8,7 @@ import { Profile } from '@prisma/client';
 import { ResponseProfileDto, UpdateProfileDto } from './profile.dto';
 import { ConfigService } from '@nestjs/config';
 import { StorageService } from '../../common/module/storage/storage.service';
+import { profileToResponsePublicProfileDto } from 'src/common/utils/profileTypeChanger';
 
 @Injectable()
 export class ProfileService {
@@ -32,14 +33,8 @@ export class ProfileService {
       throw new NotFoundException('Profile not found');
     }
 
-    return {
-      id: profile.id,
-      nickname: profile.nickname,
-      avatarUrl: profile.avatarUrl,
-      language: profile.language,
-      bio: profile.bio,
-      version: profile.version,
-    };
+    // 다른 사용자에게 공개되는 로직이므로 userId는 null로 반환
+    return profileToResponsePublicProfileDto(profile);
   }
 
   /**
@@ -50,7 +45,7 @@ export class ProfileService {
    * @param id
    * @returns
    */
-  async getProfileById(id: number): Promise<Profile> {
+  async getProfileById(id: number): Promise<ResponseProfileDto> {
     const profile = await this.profileRepository.findById(id);
 
     if (!profile) {
@@ -60,7 +55,7 @@ export class ProfileService {
     return profile;
   }
 
-  async getProfileByUserId(userId: number): Promise<Profile> {
+  async getProfileByUserId(userId: number): Promise<ResponseProfileDto> {
     const profile = await this.profileRepository.findByUserId(userId);
 
     if (!profile) {
@@ -69,6 +64,7 @@ export class ProfileService {
 
     return profile;
   }
+
   // ===== UPDATE =====
 
   async updateProfile(
@@ -140,13 +136,6 @@ export class ProfileService {
   }
 
   // ===== Find Functions =====
-  async findProfileByNickname(nickname: string): Promise<Profile | null> {
-    return await this.profileRepository.findByNickname(nickname);
-  }
-
-  async findProfileById(id: number): Promise<Profile | null> {
-    return await this.profileRepository.findById(id);
-  }
 
   // ===== Private Helper Methods =====
 

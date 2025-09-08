@@ -1,7 +1,9 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Follow, Profile } from '@prisma/client';
+import { Follow } from '@prisma/client';
 import { ProfileService } from 'src/account/profile/profile.service';
 import { FollowRepository } from './follow.repository';
+import { ResponseProfileDto } from 'src/account/profile/profile.dto';
+import { profileToResponsePublicProfileDto } from 'src/common/utils/profileTypeChanger';
 
 @Injectable()
 export class FollowService {
@@ -44,14 +46,16 @@ export class FollowService {
 
   // ===== READ =====
 
-  async getFollowers(profileId: number): Promise<Profile[]> {
+  async getFollowers(profileId: number): Promise<ResponseProfileDto[]> {
     const profile = await this.profileService.getProfileById(profileId);
-    return await this.followRepository.getFollowers(profile.id);
+    const followers = await this.followRepository.getFollowers(profile.id);
+    return followers.map(profileToResponsePublicProfileDto);
   }
 
-  async getFollowings(profileId: number): Promise<Profile[]> {
+  async getFollowings(profileId: number): Promise<ResponseProfileDto[]> {
     const profile = await this.profileService.getProfileById(profileId);
-    return await this.followRepository.getFollowings(profile.id);
+    const followings = await this.followRepository.getFollowings(profile.id);
+    return followings.map(profileToResponsePublicProfileDto);
   }
 
   async getFollowCounts(

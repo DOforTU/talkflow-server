@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Follow, Profile } from '@prisma/client';
+import { ResponseProfileDto } from 'src/account/profile/profile.dto';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
 @Injectable()
@@ -29,20 +30,38 @@ export class FollowRepository {
 
   // ===== READ =====
 
-  async getFollowers(followingId: number): Promise<Profile[]> {
-    const followers = await this.prisma.follow.findMany({
-      where: { followingId },
-      include: { follower: true },
+  async getFollowers(followingId: number): Promise<ResponseProfileDto[]> {
+    const follows = await this.prisma.follow.findMany({
+      where: {
+        followingId,
+        deletedAt: null,
+      },
+      include: {
+        follower: true,
+      },
     });
-    return followers.map((follow) => follow.follower);
+
+    return follows.map((follow) =>
+      this.profileToResponseProfileDto(follow.follower),
+    );
   }
 
-  async getFollowings(followerId: number): Promise<Profile[]> {
-    const followings = await this.prisma.follow.findMany({
-      where: { followerId },
-      include: { following: true },
+  async getFollowings(followerId: number): Promise<ResponseProfileDto[]> {
+    const follows = await this.prisma.follow.findMany({
+      where: {
+        followerId,
+        deletedAt: null,
+      },
+      include: {
+        following: true,
+      },
     });
-    return followings.map((follow) => follow.following);
+
+    console.log(follows);
+
+    return follows.map((follow) =>
+      this.profileToResponseProfileDto(follow.following),
+    );
   }
 
   async getFollowCounts(
@@ -87,5 +106,17 @@ export class FollowRepository {
       },
     });
     return follow;
+  }
+
+  private profileToResponseProfileDto(profile: Profile): ResponseProfileDto {
+    return {
+      id: profile.id,
+      nickname: profile.nickname,
+      avatarUrl: profile.avatarUrl,
+      language: profile.language,
+      bio: profile.bio,
+      version: profile.version,
+      userId: profile.userId,
+    };
   }
 }

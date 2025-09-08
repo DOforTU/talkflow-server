@@ -9,6 +9,7 @@ import {
 import { FollowService } from './follow.service';
 import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 import { Follow, Profile, User } from '@prisma/client';
+import { ResponseProfileDto } from 'src/account/profile/profile.dto';
 
 @Controller('profiles')
 export class FollowController {
@@ -30,32 +31,34 @@ export class FollowController {
   /** Get my followers */
   @Get('me/followers')
   @UseGuards(OnBoardingGuard)
-  async getMyFollowers(@Request() req: { user: User }): Promise<Profile[]> {
+  async getMyFollowers(
+    @Request() req: { user: User },
+  ): Promise<ResponseProfileDto[]> {
     return await this.followService.getFollowers(req.user.id);
   }
 
   /** Get my followings */
   @Get('me/followings')
   @UseGuards(OnBoardingGuard)
-  async getMyFollowings(@Request() req: { user: User }): Promise<Profile[]> {
+  async getMyFollowings(
+    @Request() req: { user: User },
+  ): Promise<ResponseProfileDto[]> {
     return await this.followService.getFollowings(req.user.id);
   }
 
   /** Get users who follow specific user */
   @Get(':id/followers')
   async getFollowers(
-    @Request() req: { user: User },
     @Param('id') id: number,
-  ): Promise<Profile[] | null> {
+  ): Promise<ResponseProfileDto[] | null> {
     return await this.followService.getFollowers(id);
   }
 
   /** Get users that specific user follows */
   @Get(':id/followings')
   async getFollowings(
-    @Request() req: { user: User },
     @Param('id') id: number,
-  ): Promise<Profile[] | null> {
+  ): Promise<ResponseProfileDto[] | null> {
     return await this.followService.getFollowings(id);
   }
 
