@@ -15,6 +15,8 @@ import { SilhouetteLikeModule } from './social/silhouette-like/silhouette-like.m
 import { SilhouetteModule } from './social/silhouette/silhouette.module';
 import { FollowModule } from './social/follow/follow.module';
 import { NoticeModule } from './account/notice/notice.module';
+import { AdminService } from './account/admin/admin.service';
+import { AdminModule } from './account/admin/admin.module';
 
 @Module({
   imports: [
@@ -33,9 +35,10 @@ import { NoticeModule } from './account/notice/notice.module';
     SilhouetteLikeModule,
     FollowModule,
     NoticeModule,
+    AdminModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AdminService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
