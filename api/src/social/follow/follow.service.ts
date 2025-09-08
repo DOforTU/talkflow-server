@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { Follow, Profile } from '@prisma/client';
 import { ProfileService } from 'src/account/profile/profile.service';
 import { FollowRepository } from './follow.repository';
+import { ResponseProfileDto } from 'src/account/profile/profile.dto';
 
 @Injectable()
 export class FollowService {
@@ -44,12 +45,12 @@ export class FollowService {
 
   // ===== READ =====
 
-  async getFollowers(profileId: number): Promise<Profile[]> {
+  async getFollowers(profileId: number): Promise<ResponseProfileDto[]> {
     const profile = await this.profileService.getProfileById(profileId);
     return await this.followRepository.getFollowers(profile.id);
   }
 
-  async getFollowings(profileId: number): Promise<Profile[]> {
+  async getFollowings(profileId: number): Promise<ResponseProfileDto[]> {
     const profile = await this.profileService.getProfileById(profileId);
     return await this.followRepository.getFollowings(profile.id);
   }
