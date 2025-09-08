@@ -50,4 +50,5 @@ export interface ResponseProfileDto {
   language: profile_language_enum | null;
   bio: string | null;
   version: number;
+  userId: number | null;
 }

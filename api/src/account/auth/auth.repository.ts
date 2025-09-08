@@ -7,6 +7,7 @@ import {
 } from './auth.dto';
 import { User, user_provider_enum } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { retry } from 'rxjs';
 
 @Injectable()
 export class AuthRepository {
@@ -42,6 +43,7 @@ export class AuthRepository {
             language: true,
             bio: true,
             version: true,
+            userId: true,
           },
         },
       },
@@ -100,6 +102,7 @@ export class AuthRepository {
             language: true,
             bio: true,
             version: true,
+            userId: true,
           },
         },
       },

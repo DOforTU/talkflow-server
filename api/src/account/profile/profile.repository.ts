@@ -1,7 +1,8 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Profile } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { UpdateProfileDto } from './profile.dto';
+import { ResponseProfileDto, UpdateProfileDto } from './profile.dto';
+import { profileToResponseProfileDto } from 'src/common/utils/profileTypeChanger';
 
 @Injectable()
 export class ProfileRepository {
@@ -10,21 +11,25 @@ export class ProfileRepository {
   // ===== READ =====
 
   async findById(id: number): Promise<Profile | null> {
-    return await this.prisma.profile.findFirst({
+    const profile = await this.prisma.profile.findFirst({
       where: { id, deletedAt: null },
     });
+    return profile;
   }
 
-  async findByNickname(nickname: string): Promise<Profile | null> {
-    return await this.prisma.profile.findFirst({
+  async findByNickname(nickname: string): Promise<ResponseProfileDto | null> {
+    const profile = await this.prisma.profile.findFirst({
       where: { nickname, deletedAt: null },
     });
+
+    return profileToResponseProfileDto(profile);
   }
 
-  async findByUserId(userId: number): Promise<Profile | null> {
-    return await this.prisma.profile.findFirst({
+  async findByUserId(userId: number): Promise<ResponseProfileDto | null> {
+    const profile = await this.prisma.profile.findFirst({
       where: { userId, deletedAt: null },
     });
+    return profileToResponseProfileDto(profile);
   }
 
   // ==== UPDATE ====

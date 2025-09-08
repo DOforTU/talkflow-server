@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Follow, Profile } from '@prisma/client';
+import { Follow } from '@prisma/client';
 import { ProfileService } from 'src/account/profile/profile.service';
 import { FollowRepository } from './follow.repository';
 import { ResponseProfileDto } from 'src/account/profile/profile.dto';

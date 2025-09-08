@@ -1,4 +1,3 @@
-import { ResponseProfileDto } from './../../../dist/account/profile/profile.dto.d';
 import {
   Controller,
   Get,
@@ -10,6 +9,7 @@ import {
 import { FollowService } from './follow.service';
 import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 import { Follow, Profile, User } from '@prisma/client';
+import { ResponseProfileDto } from 'src/account/profile/profile.dto';
 
 @Controller('profiles')
 export class FollowController {

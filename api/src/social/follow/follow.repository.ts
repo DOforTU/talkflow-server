@@ -41,14 +41,9 @@ export class FollowRepository {
       },
     });
 
-    return follows.map((follow) => ({
-      id: follow.follower.id,
-      nickname: follow.follower.nickname,
-      avatarUrl: follow.follower.avatarUrl,
-      language: follow.follower.language,
-      bio: follow.follower.bio,
-      version: follow.follower.version,
-    }));
+    return follows.map((follow) =>
+      this.profileToResponseProfileDto(follow.follower),
+    );
   }
 
   async getFollowings(followerId: number): Promise<ResponseProfileDto[]> {
@@ -62,14 +57,11 @@ export class FollowRepository {
       },
     });
 
-    return follows.map((follow) => ({
-      id: follow.following.id,
-      nickname: follow.following.nickname,
-      avatarUrl: follow.following.avatarUrl,
-      language: follow.following.language,
-      bio: follow.following.bio,
-      version: follow.following.version,
-    }));
+    console.log(follows);
+
+    return follows.map((follow) =>
+      this.profileToResponseProfileDto(follow.following),
+    );
   }
 
   async getFollowCounts(
@@ -114,5 +106,17 @@ export class FollowRepository {
       },
     });
     return follow;
+  }
+
+  private profileToResponseProfileDto(profile: Profile): ResponseProfileDto {
+    return {
+      id: profile.id,
+      nickname: profile.nickname,
+      avatarUrl: profile.avatarUrl,
+      language: profile.language,
+      bio: profile.bio,
+      version: profile.version,
+      userId: profile.userId,
+    };
   }
 }
