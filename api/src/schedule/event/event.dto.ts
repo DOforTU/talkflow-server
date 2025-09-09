@@ -66,6 +66,10 @@ export class CreateEventDto {
   @ValidateNested()
   @Type(() => CreateRecurringRuleDto)
   recurring?: CreateRecurringRuleDto;
+
+  @IsOptional()
+  @IsBoolean()
+  isDone?: boolean;
 }
 
 export class UpdateEventDto {
@@ -108,6 +112,10 @@ export class UpdateEventDto {
   @ValidateNested()
   @Type(() => UpdateRecurringEventDto)
   recurring?: UpdateRecurringEventDto;
+
+  @IsOptional()
+  @IsBoolean()
+  isDone?: boolean;
 }
 
 // ===== 서버 내부에서 사용되는 데이터 타입 정의 =====
@@ -118,6 +126,7 @@ export interface EventData {
   endTime: string; // "2025-09-01 21:00" 형식
   isAllDay: boolean;
   colorCode: string;
+  isDone?: boolean;
 }
 
 // ===== 서버가 클라이언트에게 응답하는 정보 DTO =====
@@ -129,6 +138,7 @@ export class ResponseEventDto {
   endTime: string; // "2025-09-01 21:00" 형식
   isAllDay: boolean;
   colorCode: string;
+  isDone: boolean;
   version: number;
 
   // time columns
@@ -140,4 +150,9 @@ export class ResponseEventDto {
   userId: number;
   recurringEventId: number | null;
   location: ResponseLocationDto | null;
+}
+
+export class UpdateEventIsDoneDto {
+  @IsBoolean()
+  isDone: boolean;
 }

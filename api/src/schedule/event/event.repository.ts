@@ -64,6 +64,7 @@ export class EventRepository {
         endTime: true,
         isAllDay: true,
         colorCode: true,
+        isDone: true,
         version: true,
 
         // time columns
@@ -116,6 +117,27 @@ export class EventRepository {
         ...eventData,
         locationId,
         recurringEventId: null, // 반복 이벤트 수정에서 "이 일정만" 선택 시 단일 일정으로 간주
+        updatedAt: new Date(),
+        version: {
+          increment: 1,
+        },
+      },
+    });
+  }
+
+  async updateEventIsDone(
+    userId: number,
+    eventId: number,
+    isDone: boolean,
+  ): Promise<Event> {
+    return await this.prismaService.event.update({
+      where: {
+        id: eventId,
+        userId: userId,
+        deletedAt: null,
+      },
+      data: {
+        isDone,
         updatedAt: new Date(),
         version: {
           increment: 1,

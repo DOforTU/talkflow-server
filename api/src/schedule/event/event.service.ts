@@ -174,6 +174,22 @@ export class EventService {
     });
   }
 
+  /**
+   * 이벤트의 완료 상태만 업데이트
+   * @param userId
+   * @param eventId
+   * @param isDone
+   * @returns
+   */
+  async updateEventIsDone(
+    userId: number,
+    eventId: number,
+    isDone: boolean,
+  ): Promise<Event> {
+    await this.getEventById(eventId, userId); // 존재 여부 확인
+    return await this.eventRepository.updateEventIsDone(userId, eventId, isDone);
+  }
+
   // ===== DELETE =====
   /**
    * 단일 이벤트 삭제
