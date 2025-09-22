@@ -12,7 +12,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { EventService } from './event.service';
-import { CreateEventDto, ResponseEventDto, UpdateEventDto } from './event.dto';
+import { CreateEventDto, ResponseEventDto, UpdateEventDto, UpdateEventIsDoneDto } from './event.dto';
 import { OnBoardingGuard } from 'src/common/guards/onboarding.guard';
 
 @Controller('events')
@@ -86,6 +86,26 @@ export class EventController {
       req.user.id,
       eventId,
       updateEventDto,
+    );
+  }
+
+  /**
+   * 이벤트의 완료 상태 업데이트
+   * @param req
+   * @param eventId
+   * @param updateEventIsDoneDto
+   * @returns
+   */
+  @Patch(':id/done')
+  async updateEventIsDone(
+    @Request() req: { user: User },
+    @Param('id', ParseIntPipe) eventId: number,
+    @Body() updateEventIsDoneDto: UpdateEventIsDoneDto,
+  ): Promise<Event> {
+    return await this.eventService.updateEventIsDone(
+      req.user.id,
+      eventId,
+      updateEventIsDoneDto.isDone,
     );
   }
 

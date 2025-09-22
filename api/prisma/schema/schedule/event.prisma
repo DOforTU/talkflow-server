@@ -10,6 +10,7 @@ model Event{
   endTime     String      @db.VarChar(16) // "2025-09-01 21:00" 형식
   isAllDay    Boolean     @default(false)
   colorCode   String      @db.VarChar(7)
+  isDone      Boolean     @default(false)
 
   // Relations 
   userId            Int
