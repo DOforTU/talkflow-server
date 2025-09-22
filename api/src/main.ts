@@ -68,7 +68,7 @@ async function bootstrap() {
       tagsSorter: 'alpha', // 태그를 알파벳 순으로 정렬
       operationsSorter: 'alpha', // 메서드를 알파벳 순으로 정렬
     },
-    customSiteTitle: 'TULOG API 문서',
+    customSiteTitle: 'Silhouette API 문서',
     customfavIcon: '/uploads/favicon.ico', // 선택사항: 파비콘 설정
     customCss: `
       .topbar-wrapper .link {

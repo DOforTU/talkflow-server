@@ -7,15 +7,46 @@ import {
 } from './auth.dto';
 import { User, user_provider_enum } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { retry } from 'rxjs';
 
 @Injectable()
 export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findUserInfoById(userId: number): Promise<UserWithProfile | null> {
+  async findUserWithProfileById(
+    userId: number,
+  ): Promise<UserWithProfile | null> {
     return await this.prisma.user.findFirst({
-      where: { id: userId, deletedAt: null },
-      include: { profile: true },
+      where: { id: userId, deletedAt: null, profile: { deletedAt: null } },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        oauthId: true,
+        role: true,
+        provider: true,
+        version: true,
+
+        // timestamps
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+        lastLogin: true,
+
+        // relations
+        profile: {
+          select: {
+            id: true,
+            nickname: true,
+            avatarUrl: true,
+            language: true,
+            bio: true,
+            version: true,
+            userId: true,
+          },
+        },
+      },
     });
   }
 
@@ -40,11 +71,40 @@ export class AuthRepository {
     });
   }
 
-  async findUserBySub(sub: number): Promise<User | null> {
+  async findUserBySub(sub: number): Promise<UserWithProfile | null> {
     return await this.prisma.user.findFirst({
       where: {
         id: sub,
         deletedAt: null,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        oauthId: true,
+        role: true,
+        provider: true,
+        version: true,
+
+        // timestamps
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+        lastLogin: true,
+
+        // relations
+        profile: {
+          select: {
+            id: true,
+            nickname: true,
+            avatarUrl: true,
+            language: true,
+            bio: true,
+            version: true,
+            userId: true,
+          },
+        },
       },
     });
   }

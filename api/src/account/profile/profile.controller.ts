@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { JwtAuthGuard } from '../auth/jwt';
-import { UpdateProfileDto } from './profile.dto';
+import { ResponseProfileDto, UpdateProfileDto } from './profile.dto';
 import { Profile, User } from '@prisma/client';
 
 @Controller('profiles')
@@ -18,7 +18,9 @@ export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @Get(':nickname')
-  async getProfileByNickname(@Param('nickname') nickname: string) {
+  async getProfileByNickname(
+    @Param('nickname') nickname: string,
+  ): Promise<ResponseProfileDto> {
     return await this.profileService.getProfileByNickname(nickname);
   }
 

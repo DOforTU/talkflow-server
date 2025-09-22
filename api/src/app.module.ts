@@ -8,9 +8,15 @@ import { PrismaModule } from './common/prisma/prisma.module';
 import { UserModule } from './account/user/user.module';
 import { AuthModule } from './account/auth/auth.module';
 import { ProfileModule } from './account/profile/profile.module';
-import { SilhouetteModule } from './silhouette/silhouette/silhouette.module';
-import { SilhouetteLikeModule } from './silhouette/silhouette-like/silhouette-like.module';
 import { FileModule } from './common/module/file/file.module';
+import { EventModule } from './schedule/event/event.module';
+import { RecurringEventModule } from './schedule/recurring-event/recurring-event.module';
+import { SilhouetteLikeModule } from './social/silhouette-like/silhouette-like.module';
+import { SilhouetteModule } from './social/silhouette/silhouette.module';
+import { FollowModule } from './social/follow/follow.module';
+import { NoticeModule } from './account/notice/notice.module';
+import { AdminService } from './account/admin/admin.service';
+import { AdminModule } from './account/admin/admin.module';
 
 @Module({
   imports: [
@@ -22,12 +28,17 @@ import { FileModule } from './common/module/file/file.module';
     AuthModule,
     UserModule,
     ProfileModule,
+    FileModule,
+    EventModule,
+    RecurringEventModule,
     SilhouetteModule,
     SilhouetteLikeModule,
-    FileModule,
+    FollowModule,
+    NoticeModule,
+    AdminModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AdminService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
